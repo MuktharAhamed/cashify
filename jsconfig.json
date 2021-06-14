@@ -7,6 +7,9 @@
             "app-hooks/*":["./src/hooks/*"],
             "app-navigations/*":["./src/navigations/*"],
             "app-utils/*":["./src/utils/*"],
+            "app-views/*":["./src/views/*"],
+            "app-services/*":["./src/services/*"],
+            "app-assets/*":["./src/assets/*"]
         }
     },
     "exclude": ["node_modules"]
