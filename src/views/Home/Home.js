@@ -1,4 +1,4 @@
-import {NavSplashScreen} from 'app-constants/Navigations';
+import {NavSplashScreen, NavProductDetailPage} from 'app-constants/Navigations';
 import React from 'react';
 import {ScrollView, View, TouchableOpacity, Image, Text} from 'react-native';
 import {Button} from 'react-native-paper';
@@ -32,6 +32,23 @@ const Home = ({navigation}) => {
       <ByBrand />
       <TodaysDeals />
       {/* <Button onPress={() => navigation.navigate(NavSplashScreen)}>dsf</Button> */}
+      {/* <ViewPagerAndroid da>
+        <View key="1">
+          <Text>First page</Text>
+        </View>
+        <View key="2">
+          <Text>Second page</Text>
+        </View>
+      </ViewPagerAndroid> */}
+      <Button onPress={() => navigation.navigate(NavSplashScreen)}>dsf</Button>
+      <Button
+        onPress={() =>
+          navigation.navigate(NavProductDetailPage, {
+            productId: '6815097553052',
+          })
+        }>
+        ProductDetailPage
+      </Button>
     </ScrollView>
   );
 };
