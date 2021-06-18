@@ -1,9 +1,10 @@
 import React from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
-import {NavHome, NavSplashScreen} from 'app-constants/Navigations';
+import {NavHome, NavSplashScreen, NavProductDetailPage} from 'app-constants/Navigations';
 import Home from 'app-views/Home/Home';
 import SplashScreen from 'app-views/SplashScreen';
+import ProductDetailPage from 'app-views/ProductDetailPage';
 import {Appbar} from 'react-native-paper';
 // import {
 //   menu,
@@ -27,6 +28,7 @@ const AppNavigation = () => {
         }}>
         <Stack.Screen name={NavHome} component={Home} />
         <Stack.Screen name={NavSplashScreen} component={SplashScreen} />
+        <Stack.Screen name={NavProductDetailPage} component={ProductDetailPage} />
       </Stack.Navigator>
     </NavigationContainer>
   );
