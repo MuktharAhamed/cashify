@@ -3,8 +3,12 @@ import React from 'react';
 import {ScrollView, View, TouchableOpacity, Image, Text} from 'react-native';
 import {Button} from 'react-native-paper';
 import {Searchbar} from 'react-native-paper';
-import Catergories from 'app-components/Categories';
-// import {ViewPagerAndroid} from 'react-native-viewpager';
+import Catergories from 'app-views/Home/Categories';
+import ByPrice from 'app-views/Home/ByPrice';
+import ByGrade from 'app-views/Home/ByGrade';
+import ByBrand from 'app-views/Home/ByBrand';
+import TodaysDeals from 'app-views/Home/TodaysDeals';
+import style from 'app-views/Home/style';
 
 const Home = ({navigation}) => {
   const [searchQuery, setSearchQuery] = React.useState('');
@@ -12,23 +16,22 @@ const Home = ({navigation}) => {
   const onChangeSearch = query => setSearchQuery(query);
 
   return (
-    <ScrollView style={{flex: 1}}>
+    <ScrollView
+      style={style.scrollview}
+      // contentContainerStyle={{alignItems: 'center'}}
+    >
       <Searchbar
-        placeholder="Search"
+        placeholder="Search mobile to buy"
         onChangeText={onChangeSearch}
         value={searchQuery}
-        style={{marginBottom: 5}}
+        style={style.Searchbar}
       />
       <Catergories />
-      {/* <ViewPagerAndroid da>
-        <View key="1">
-          <Text>First page</Text>
-        </View>
-        <View key="2">
-          <Text>Second page</Text>
-        </View>
-      </ViewPagerAndroid> */}
-      <Button onPress={() => navigation.navigate(NavSplashScreen)}>dsf</Button>
+      <ByPrice />
+      <ByGrade />
+      <ByBrand />
+      <TodaysDeals />
+      {/* <Button onPress={() => navigation.navigate(NavSplashScreen)}>dsf</Button> */}
       <Button onPress={() => navigation.navigate(NavProductDetailPage, {
             productId: '6815097553052',
           })}>ProductDetailPage</Button>
