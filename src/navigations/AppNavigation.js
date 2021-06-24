@@ -5,6 +5,8 @@ import {
   NavHome,
   NavSplashScreen,
   NavProductDetailPage,
+  NavLogin,
+  NavSignup,
 } from 'app-constants/Navigations';
 import Home from 'app-views/Home/Home';
 import SplashScreen from 'app-views/SplashScreen';
@@ -17,6 +19,9 @@ import {
 } from 'react-native-appearance';
 import {DefaultTheme, DarkTheme} from '@react-navigation/native';
 import {useColorScheme} from 'react-native';
+import Login from 'app-views/Login/Login';
+import Signup from 'app-views/Signup/Signup';
+
 const Stack = createStackNavigator();
 
 export const RootNavRef = React.createRef();
@@ -48,21 +53,15 @@ const AppNavigation = () => {
           }}>
           <Stack.Screen name={NavHome} component={Home} />
           <Stack.Screen name={NavSplashScreen} component={SplashScreen} />
+          <Stack.Screen
+            name={NavProductDetailPage}
+            component={ProductDetailPage}
+          />
+          <Stack.Screen name={NavLogin} component={Login} />
+          <Stack.Screen name={NavSignup} component={Signup} />
         </Stack.Navigator>
       </NavigationContainer>
     </AppearanceProvider>
-    // <NavigationContainer ref={RootNavRef}>
-    //   {/* <Stack.Navigator initialRouteName={NavHome}> */}
-    //   <Stack.Navigator
-    //     initialRouteName="Home"
-    //     screenOptions={{
-    //       header: props => <CustomNavigationBar {...props} />,
-    //     }}>
-    //     <Stack.Screen name={NavHome} component={Home} />
-    //     <Stack.Screen name={NavSplashScreen} component={SplashScreen} />
-    //     <Stack.Screen name={NavProductDetailPage} component={ProductDetailPage} />
-    //   </Stack.Navigator>
-    // </NavigationContainer>
   );
 };
 
