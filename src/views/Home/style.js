@@ -1,4 +1,3 @@
-import React from 'react';
 import {StyleSheet} from 'react-native';
 
 const style = StyleSheet.create({
@@ -58,7 +57,6 @@ const style = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 5,
-    elevation: 2,
     shadowColor: '#000',
     shadowOffset: {width: 1, height: 1},
     shadowOpacity: 0.4,
