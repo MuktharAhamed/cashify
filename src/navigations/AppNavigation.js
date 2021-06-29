@@ -14,6 +14,7 @@ import SplashScreen from 'app-views/SplashScreen';
 import ProductDetail from 'app-views/ProductDetail';
 import ProductListing from 'app-views/ProductListing';
 import Cart from 'app-views/Cart'
+import ProductDetailPage from 'app-views/ProductDetailPage';
 import {Appbar} from 'react-native-paper';
 import {
   AppearanceProvider,
@@ -56,15 +57,13 @@ const AppNavigation = () => {
           }}>
           <Stack.Screen name={NavHome} component={Home} />
           <Stack.Screen name={NavSplashScreen} component={SplashScreen} />
-          <Stack.Screen name={NavProductDetailPage} component={ProductDetail} />
-          <Stack.Screen name={NavProductListingPage} component={ProductListing} />
-          <Stack.Screen name={NavCartPage} component={Cart} />
           <Stack.Screen
             name={NavProductDetailPage}
             component={ProductDetailPage}
           />
           <Stack.Screen name={NavLogin} component={Login} />
           <Stack.Screen name={NavSignup} component={Signup} />
+          <Stack.Screen name={NavProductDetailPage} component={ProductDetail} />
         </Stack.Navigator>
       </NavigationContainer>
     </AppearanceProvider>

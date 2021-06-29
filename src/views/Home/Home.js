@@ -6,6 +6,8 @@ import {
   NavSignup,
   NavProductListingPage
 } from 'app-constants/Navigations';
+
+
 import React from 'react';
 import {
   ScrollView,
@@ -70,6 +72,11 @@ const Home = ({navigation}) => {
       <ByGrade />
       <ByBrand />
       <TodaysDeals />
+
+      {/* <Button onPress={() => navigation.navigate(NavSplashScreen)}>dsf</Button> */}
+      
+      <Button onPress={() => navigation.navigate(NavProductListingPage)}>Product listing page</Button>
+      <Button onPress={() => navigation.navigate(NavCartPage)}>Cart page</Button>
       <Button
         onPress={() =>
           navigation.navigate(NavProductDetailPage, {
@@ -80,12 +87,7 @@ const Home = ({navigation}) => {
       </Button>
       <Button onPress={() => navigation.navigate(NavLogin)}>Login</Button>
       <Button onPress={() => navigation.navigate(NavSignup)}>Signup</Button>
-      {/* <Button onPress={() => navigation.navigate(NavSplashScreen)}>dsf</Button> */}
-      <Button onPress={() => navigation.navigate(NavProductDetailPage, {
-            productId: '6815097553052',
-          })}>ProductDetailPage</Button>
-      <Button onPress={() => navigation.navigate(NavProductListingPage)}>Product listing page</Button>
-      <Button onPress={() => navigation.navigate(NavCartPage)}>Cart page</Button>
+
     </ScrollView>
   );
 };
