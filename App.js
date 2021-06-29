@@ -12,7 +12,9 @@ import {
   createHttpLink,
 } from "@apollo/client";
 import { setContext } from '@apollo/client/link/context';
+import { typography } from 'app-utils/typography'
 
+typography();
 const httpLink = createHttpLink({ uri: 'https://testapiforecommerce.myshopify.com/api/graphql' })
 
 const middlewareLink = setContext(() => ({

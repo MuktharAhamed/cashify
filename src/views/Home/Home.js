@@ -1,3 +1,4 @@
+import {NavCartPage,NavProductDetailPage, NavProductListingPage} from 'app-constants/Navigations';
 import {
   NavSplashScreen,
   NavProductDetailPage,
@@ -69,6 +70,12 @@ const Home = ({navigation}) => {
       <ByGrade />
       <ByBrand />
       <TodaysDeals />
+      {/* <Button onPress={() => navigation.navigate(NavSplashScreen)}>dsf</Button> */}
+      <Button onPress={() => navigation.navigate(NavProductDetailPage, {
+            productId: '6815097553052',
+          })}>ProductDetailPage</Button>
+      <Button onPress={() => navigation.navigate(NavProductListingPage)}>Product listing page</Button>
+      <Button onPress={() => navigation.navigate(NavCartPage)}>Cart page</Button>
       <Button
         onPress={() =>
           navigation.navigate(NavProductDetailPage, {
