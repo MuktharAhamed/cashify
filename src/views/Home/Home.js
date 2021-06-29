@@ -1,4 +1,4 @@
-import {NavSplashScreen,NavProductDetailPage} from 'app-constants/Navigations';
+import {NavCartPage,NavProductDetailPage, NavProductListingPage} from 'app-constants/Navigations';
 import React from 'react';
 import {ScrollView, View, TouchableOpacity, Image, Text} from 'react-native';
 import {Button} from 'react-native-paper';
@@ -35,6 +35,8 @@ const Home = ({navigation}) => {
       <Button onPress={() => navigation.navigate(NavProductDetailPage, {
             productId: '6815097553052',
           })}>ProductDetailPage</Button>
+      <Button onPress={() => navigation.navigate(NavProductListingPage)}>Product listing page</Button>
+      <Button onPress={() => navigation.navigate(NavCartPage)}>Cart page</Button>
     </ScrollView>
   );
 };
