@@ -51,16 +51,16 @@ const AppNavigation = () => {
         >
         {/* <Stack.Navigator initialRouteName={NavHome}> */}
         <Stack.Navigator
-          initialRouteName="Home"
+          initialRouteName={NavHome}
           screenOptions={{
             header: props => <CustomNavigationBar {...props} />,
           }}>
           <Stack.Screen name={NavHome} component={Home} />
           <Stack.Screen name={NavSplashScreen} component={SplashScreen} />
-          <Stack.Screen
+          {/* <Stack.Screen
             name={NavProductDetailPage}
             component={ProductDetailPage}
-          />
+          /> */}
           <Stack.Screen name={NavLogin} component={Login} />
           <Stack.Screen name={NavSignup} component={Signup} />
           <Stack.Screen name={NavProductDetailPage} component={ProductDetail} />

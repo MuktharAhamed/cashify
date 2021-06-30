@@ -9,22 +9,35 @@ import {
   useQuery,
   gql,
   HttpLink,
+  ApolloLink,
   createHttpLink,
+  from
 } from "@apollo/client";
 import { setContext } from '@apollo/client/link/context';
 import { typography } from 'app-utils/typography'
 
 typography();
-const httpLink = createHttpLink({ uri: 'https://testapiforecommerce.myshopify.com/api/graphql' })
+const httpLink = createHttpLink({ uri: 'https://dvnikhilraj.myshopify.com/api/graphql' })
 
-const middlewareLink = setContext(() => ({
-  headers: {
-    'X-Shopify-Storefront-Access-Token': '2997ceea6da1a55b696ff76e19e287ba'
-  }
-}))
+// const middlewareLink = setContext(() => ({
+//   headers: {
+//     'X-Shopify-Storefront-Access-Token': '2997ceea6da1a55b696ff76e19e287ba'
+//   }
+// }))
+const authMiddleware = new ApolloLink((operation, forward) => {
+  const customHeaders = operation.getContext().hasOwnProperty("headers") ? operation.getContext().headers : {};
+  console.log("customHeaders");
+  console.log(customHeaders);
+  operation.setContext({
+    headers: {
+      ...customHeaders
+    }
+  });
+  return forward(operation);
+});
 
 const client = new ApolloClient({
-  link: middlewareLink.concat(httpLink),
+  link: from([authMiddleware, httpLink]),
   cache: new InMemoryCache(),
 })
 

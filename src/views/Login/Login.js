@@ -3,8 +3,52 @@ import {useState} from 'react';
 import {TextInput, Button} from 'react-native-paper';
 import {View, Text} from 'react-native';
 import style from 'app-views/Login/style';
+import { gql, useMutation } from '@apollo/client';
+import { useEffect } from 'react/cjs/react.production.min';
+
+const create_customer = gql`
+  mutation customerCreate($input: CustomerCreateInput!) {
+    customerCreate(input: $input) {
+      customer {
+        id
+      }
+      customerUserErrors {
+        code
+        field
+        message
+      }
+    }
+  }
+`;
 
 const Login = () => {
+  const [
+    updateTodo,
+    { loading: creatingCustomer, error: customerCreationError },
+  ] = useMutation(create_customer,{
+    context: {
+      headers: {
+        'X-Shopify-Storefront-Access-Token': '2997ceea6da1a55b696ff76e19e287ba',        
+      }
+    }
+  });
+
+  useEffect(() => {
+    updateTodo({ variables: { 
+          input : { 
+          "email": "user@example.com",
+          "password": "HiZqFuDvDdQ7" 
+        } 
+  },
+  // context: {
+  //   headers: {
+  //     "x-custom-component-add": "kkk-add",
+  //     "x-origin-server": "pure-react"
+  //   }
+  // }
+});
+  }, []);
+
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showpassword, setShowpassword] = useState({
@@ -37,6 +81,7 @@ const Login = () => {
   };
   const handlesignup = () => {
     console.log('handlesignup');
+
   };
   return (
     <View style={style.parentview}>

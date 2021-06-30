@@ -34,10 +34,7 @@ query query {
         node {
           id
           title
-          metafield(key: "related_products", namespace: "Products_metafields") {
-            namespace
-            value
-          }
+        
         }
       }
     }
@@ -53,7 +50,13 @@ const lists = [
 ];
 const ByBrand = () => {
 
-  const { loading, error, data } = useQuery(query);
+  const { loading, error, data } = useQuery(query,{
+    context: {
+      headers: {
+        'X-Shopify-Storefront-Access-Token': '2997ceea6da1a55b696ff76e19e287ba',        
+      }
+    }
+  });
 
   console.log("loading", loading);
   // if (error) return `Error! ${error.message}`;
