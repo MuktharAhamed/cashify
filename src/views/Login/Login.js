@@ -63,7 +63,7 @@ const Login = () => {
           onChangeText={text => handlesetpassword(text)}
           style={style.passwordtextinput}
         />
-        <Text style={{color: 'red'}}>{errormessage}</Text>
+        {errormessage && <Text style={{color: 'red'}}>{errormessage}</Text>}
         <Button mode="outlined" onPress={handlelogin} style={style.loginbutton}>
           Login
         </Button>

@@ -1,6 +1,17 @@
 import React from 'react';
 import {ScrollView, View, Text, TouchableNativeFeedback} from 'react-native';
 import style from 'app-views/Home/style';
+import {
+  ApolloClient,
+  InMemoryCache,
+  ApolloProvider,
+  useQuery,
+  gql,
+  HttpLink,
+  createHttpLink,
+} from '@apollo/client';
+import {NavProductListingPage} from 'app-constants/Navigations';
+import {useNavigation} from '@react-navigation/native';
 
 const lists = [
   {text: 'E', color: `#ffa500`},
@@ -9,6 +20,26 @@ const lists = [
   {text: 'B', color: `#87ceeb`},
   {text: 'A', color: `#00ff7f`},
 ];
+const query = gql`
+  query query {
+    shop {
+      name
+      products(first: 10) {
+        edges {
+          node {
+            variantBySelectedOptions(
+              selectedOptions: {name: "GRADE", value: "GRADE A"}
+            ) {
+              id
+              title
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
 const ByGrade = () => {
   return (
     <>
@@ -33,9 +64,14 @@ const ByGrade = () => {
 
 const Subelements = ({text, color}) => {
   console.log(color, 'color');
+  const navigation = useNavigation();
+
+  const navtoProductListing = () => {
+    navigation.navigate(NavProductListingPage);
+  };
   return (
     <View>
-      <TouchableNativeFeedback>
+      <TouchableNativeFeedback onPress={navtoProductListing}>
         <View style={style.boxview}>
           <Text
             style={[

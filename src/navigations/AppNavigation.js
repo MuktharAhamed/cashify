@@ -1,13 +1,20 @@
 import React from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
-import {NavHome, NavSplashScreen, NavProductDetailPage,NavProductListingPage,NavCartPage, NavLogin,
-  NavSignup} from 'app-constants/Navigations';
+import {
+  NavHome,
+  NavSplashScreen,
+  NavProductDetailPage,
+  NavProductListingPage,
+  NavCartPage,
+  NavLogin,
+  NavSignup,
+} from 'app-constants/Navigations';
 import Home from 'app-views/Home/Home';
 import SplashScreen from 'app-views/SplashScreen';
 import ProductDetail from 'app-views/ProductDetail';
 import ProductListing from 'app-views/ProductListing';
-import Cart from 'app-views/Cart'
+// import Cart from 'app-views/Cart'
 import ProductDetailPage from 'app-views/ProductDetailPage';
 import {Appbar} from 'react-native-paper';
 import {
@@ -40,9 +47,7 @@ const AppNavigation = () => {
   };
   return (
     <AppearanceProvider>
-      <NavigationContainer
-        ref={RootNavRef}
-        >
+      <NavigationContainer ref={RootNavRef}>
         {/* <Stack.Navigator initialRouteName={NavHome}> */}
         <Stack.Navigator
           initialRouteName="Home"
@@ -53,16 +58,18 @@ const AppNavigation = () => {
           <Stack.Screen name={NavSplashScreen} component={SplashScreen} />
 
           <Stack.Screen name={NavProductDetailPage} component={ProductDetail} />
-          <Stack.Screen name={NavProductListingPage} component={ProductListing} />
-          <Stack.Screen name={NavCartPage} component={Cart} />
-
           <Stack.Screen
+            name={NavProductListingPage}
+            component={ProductListing}
+          />
+          {/* <Stack.Screen name={NavCartPage} component={Cart} /> */}
+
+          {/* <Stack.Screen
             name={NavProductDetailPage}
             component={ProductDetailPage}
-          />
+          /> */}
           <Stack.Screen name={NavLogin} component={Login} />
           <Stack.Screen name={NavSignup} component={Signup} />
-
         </Stack.Navigator>
       </NavigationContainer>
     </AppearanceProvider>
