@@ -7,7 +7,7 @@ import {
   NavProductDetailPage,
   NavLogin,
   NavSignup,
-  NavProductListingPage
+  NavCartPage
 } from 'app-constants/Navigations';
 import Home from 'app-views/Home/Home';
 import SplashScreen from 'app-views/SplashScreen';
@@ -64,6 +64,7 @@ const AppNavigation = () => {
           <Stack.Screen name={NavLogin} component={Login} />
           <Stack.Screen name={NavSignup} component={Signup} />
           <Stack.Screen name={NavProductDetailPage} component={ProductDetail} />
+          <Stack.Screen name={NavCartPage} component={Cart} />
         </Stack.Navigator>
       </NavigationContainer>
     </AppearanceProvider>

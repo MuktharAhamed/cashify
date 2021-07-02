@@ -1,7 +1,7 @@
 import {
   NavSplashScreen,
   NavProductDetailPage,
-  NavHome,
+  NavCartPage,
   NavLogin,
   NavSignup,
   NavProductListingPage

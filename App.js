@@ -6,31 +6,40 @@ import {
   ApolloClient,
   InMemoryCache,
   ApolloProvider,
-  useQuery,
-  gql,
-  HttpLink,
   ApolloLink,
   createHttpLink,
   from
 } from "@apollo/client";
-import { setContext } from '@apollo/client/link/context';
 import { typography } from 'app-utils/typography'
 
 typography();
-const httpLink = createHttpLink({ uri: 'https://dvnikhilraj.myshopify.com/api/graphql' })
+const httpLink = createHttpLink();
 
 // const middlewareLink = setContext(() => ({
 //   headers: {
 //     'X-Shopify-Storefront-Access-Token': '2997ceea6da1a55b696ff76e19e287ba'
 //   }
 // }))
+
+// const dynamicUri (uri) => {
+//   return uri;
+// }
 const authMiddleware = new ApolloLink((operation, forward) => {
   const customHeaders = operation.getContext().hasOwnProperty("headers") ? operation.getContext().headers : {};
+  const dynamicUri = operation.getContext().hasOwnProperty("uri") ? operation.getContext().uri : {};
+  console.log(dynamicUri);
+          console.log("dynamicUri");
   console.log("customHeaders");
   console.log(customHeaders);
   operation.setContext({
+    uri : dynamicUri,
     headers: {
-      ...customHeaders
+      ...customHeaders,
+      // 'X-Shopify-Access-Token': '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',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Credentials': true,
+      // "Content-Type": "application/json",
+      //  Accept: 'application/json',
     }
   });
   return forward(operation);

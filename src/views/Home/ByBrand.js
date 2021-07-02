@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { GraphqlAdminApi , GraphqlStoreFrontApi} from 'app-constants/GraphqlConstants'
 import {
   ScrollView,
   View,
@@ -25,17 +26,11 @@ import style from 'app-views/Home/style';
 // import gql from 'graphql-tag';
 
 const query = gql`
-query query {
-  shop {
-    name
-    description
-    products(first: 20) {
-      edges {
-        node {
-          id
-          title
-        
-        }
+query getCustomer {
+  customers(query: "lastName:No_G$t", first: 1) {
+    edges {
+      node {
+        email
       }
     }
   }
@@ -51,15 +46,14 @@ const lists = [
 const ByBrand = () => {
 
   const { loading, error, data } = useQuery(query,{
-    context: {
-      headers: {
-        'X-Shopify-Storefront-Access-Token': '2997ceea6da1a55b696ff76e19e287ba',        
-      }
-    }
+    context: GraphqlAdminApi
   });
 
   console.log("loading", loading);
-  // if (error) return `Error! ${error.message}`;
+  if (error) 
+  {
+    console.log("error.message", error);
+  }
   console.log("data", data)
 
 
