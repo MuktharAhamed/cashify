@@ -7,13 +7,16 @@ import {
   NavProductDetailPage,
   NavLogin,
   NavSignup,
-  NavCartPage
+  NavCartPage,
+  NavForgotPassword,
 } from 'app-constants/Navigations';
 import Home from 'app-views/Home/Home';
 import SplashScreen from 'app-views/SplashScreen';
+import ForgotPassword from 'app-views/ForgotPassword';
 import ProductDetail from 'app-views/ProductDetail';
 import ProductListing from 'app-views/ProductListing';
-import Cart from 'app-views/Cart'
+import {Provider} from 'react-redux';
+import Cart from 'app-views/Cart';
 import ProductDetailPage from 'app-views/ProductDetailPage';
 import {Appbar} from 'react-native-paper';
 import {
@@ -22,17 +25,19 @@ import {
   Appearance,
 } from 'react-native-appearance';
 import {DefaultTheme, DarkTheme} from '@react-navigation/native';
-import {useColorScheme} from 'react-native';
+// import {useColorScheme} from 'react-native';
 import Login from 'app-views/Login/Login';
 import Signup from 'app-views/Signup/Signup';
+import {PersistGate} from 'redux-persist/integration/react';
+
+// import store
+import store, {persistor} from '../store';
 
 const Stack = createStackNavigator();
 
 export const RootNavRef = React.createRef();
 
 const AppNavigation = () => {
-  const scheme = useColorScheme();
-  console.log('scheme', scheme, Appearance.getColorScheme());
   const MyDarkTheme = {
     dark: true,
     colors: {
@@ -46,27 +51,33 @@ const AppNavigation = () => {
   };
   return (
     <AppearanceProvider>
-      <NavigationContainer
-        ref={RootNavRef}
-        >
-        {/* <Stack.Navigator initialRouteName={NavHome}> */}
-        <Stack.Navigator
-          initialRouteName={NavHome}
-          screenOptions={{
-            header: props => <CustomNavigationBar {...props} />,
-          }}>
-          <Stack.Screen name={NavHome} component={Home} />
-          <Stack.Screen name={NavSplashScreen} component={SplashScreen} />
-          {/* <Stack.Screen
-            name={NavProductDetailPage}
-            component={ProductDetailPage}
-          /> */}
-          <Stack.Screen name={NavLogin} component={Login} />
-          <Stack.Screen name={NavSignup} component={Signup} />
-          <Stack.Screen name={NavProductDetailPage} component={ProductDetail} />
-          <Stack.Screen name={NavCartPage} component={Cart} />
-        </Stack.Navigator>
-      </NavigationContainer>
+      <Provider store={store}>
+        <PersistGate persistor={persistor}>
+          <NavigationContainer ref={RootNavRef}>
+            {/* <Stack.Navigator initialRouteName={NavHome}> */}
+            <Stack.Navigator
+              initialRouteName={NavProductDetailPage}
+              screenOptions={{
+                headerShown: false,
+              }}
+            >
+              <Stack.Screen name={NavSplashScreen} component={SplashScreen} />
+              <Stack.Screen name={NavLogin} component={Login} />
+              <Stack.Screen name={NavSignup} component={Signup} />
+              <Stack.Screen
+                name={NavForgotPassword}
+                component={ForgotPassword}
+              />
+              <Stack.Screen name={NavHome} component={Home} />
+              <Stack.Screen
+                name={NavProductDetailPage}
+                component={ProductDetail}
+              />
+              <Stack.Screen name={NavCartPage} component={Cart} />
+            </Stack.Navigator>
+          </NavigationContainer>
+        </PersistGate>
+      </Provider>
     </AppearanceProvider>
   );
 };
@@ -83,7 +94,8 @@ function CustomNavigationBar({navigation, previous}) {
         // borderTopWidth: 0, //works
         // borderBottomWidth: 0, //works
         elevation: 0,
-      }}>
+      }}
+    >
       {!previous ? <Appbar.Action icon="menu" /> : null}
       {previous ? <Appbar.BackAction onPress={navigation.goBack} /> : null}
       <Appbar.Content title="SUPER SALES " />

@@ -1,5 +1,8 @@
-import React, { useEffect } from 'react';
-import { GraphqlAdminApi , GraphqlStoreFrontApi} from 'app-constants/GraphqlConstants'
+import React, {useEffect} from 'react';
+import {
+  GraphqlAdminApi,
+  GraphqlStoreFrontApi,
+} from 'app-constants/GraphqlConstants';
 import {
   ScrollView,
   View,
@@ -17,45 +20,55 @@ import {
   gql,
   HttpLink,
   createHttpLink,
+} from '@apollo/client';
 
-} from "@apollo/client";
-
-
-import { useTheme } from '@react-navigation/native';
+import {useTheme} from '@react-navigation/native';
 import style from 'app-views/Home/style';
 // import gql from 'graphql-tag';
 
 const query = gql`
-query getCustomer {
-  customers(query: "lastName:No_G$t", first: 1) {
-    edges {
-      node {
-        email
+  query MyQuery {
+    collections(first: 10) {
+      edges {
+        node {
+          products(first: 10) {
+            edges {
+              node {
+                variants(first: 10) {
+                  edges {
+                    node {
+                      id
+                      price
+                      quantityAvailable
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     }
   }
-}`;
+`;
 
 const lists = [
-  { source: require('app-assets/brands/realme.jpg') },
-  { source: require('app-assets/brands/mi.jpg') },
-  { source: require('app-assets/brands/oppo.jpg') },
-  { source: require('app-assets/brands/vivo.jpg') },
-  { source: require('app-assets/brands/samsung.jpg') },
+  {source: require('app-assets/brands/realme.jpg')},
+  {source: require('app-assets/brands/mi.jpg')},
+  {source: require('app-assets/brands/oppo.jpg')},
+  {source: require('app-assets/brands/vivo.jpg')},
+  {source: require('app-assets/brands/samsung.jpg')},
 ];
 const ByBrand = () => {
-
-  const { loading, error, data } = useQuery(query,{
-    context: GraphqlAdminApi
+  const {loading, error, data} = useQuery(query, {
+    context: GraphqlStoreFrontApi,
   });
 
-  console.log("loading", loading);
-  if (error) 
-  {
-    console.log("error.message", error);
+  console.log('loading', loading);
+  if (error) {
+    console.log('error.message', error);
   }
-  console.log("data", data)
-
+  console.log('data', data);
 
   return (
     <>
@@ -69,7 +82,8 @@ const ByBrand = () => {
         style={{
           marginBottom: 10,
           height: 90,
-        }}>
+        }}
+      >
         {lists.map((e, index) => (
           <Subelements key={index} source={e.source} />
         ))}
@@ -78,9 +92,9 @@ const ByBrand = () => {
   );
 };
 
-const Subelements = ({ source, text }) => {
+const Subelements = ({source, text}) => {
   return (
-    <View style={[{ ...style.boxview, width: 80, height: 60 }]}>
+    <View style={[{...style.boxview, width: 80, height: 60}]}>
       <TouchableOpacity>
         <Image source={source} style={style.bybrandimage} />
       </TouchableOpacity>

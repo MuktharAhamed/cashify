@@ -1,30 +1,24 @@
 import React from 'react';
 import {TouchableOpacity, Image, StyleSheet} from 'react-native';
 
-export default (ChildItem = ({
+export default ChildItem = ({
   item,
   style,
   onPress,
   index,
   imageKey,
   local,
-  height
+  height,
 }) => {
-    // console.log("item");
-    // console.log(item);
-    // console.log("imageKey");
-    // console.log(item[imageKey]);
   return (
-    <TouchableOpacity
-      style={styles.container}
-      onPress={() => onPress(index)}>
+    <TouchableOpacity style={styles.container} onPress={() => onPress(index)}>
       <Image
         style={[styles.image, style, {height: height}]}
         source={local ? item[imageKey] : {uri: item[imageKey]}}
       />
     </TouchableOpacity>
   );
-});
+};
 
 const styles = StyleSheet.create({
   container: {},
