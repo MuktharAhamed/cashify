@@ -1,3 +1,4 @@
+
 import { StyleSheet, Dimensions } from 'react-native';
 import { ScaledSheet } from 'react-native-size-matters';
 const style = ScaledSheet.create({
@@ -30,6 +31,7 @@ const style = ScaledSheet.create({
     elevation: 2,
     shadowColor: '#000000',
     shadowOffset: { width: 1, height: 1 },
+
     shadowOpacity: 0.4,
     shadowRadius: 3,
     elevation: 5,
@@ -101,3 +103,4 @@ const style = ScaledSheet.create({
   }
 });
 export default style;
+

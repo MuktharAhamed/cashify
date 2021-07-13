@@ -1,0 +1,3 @@
+export const SET_CUSTOMER = 'SET_CUSTOMER';
+export const GET_CUSTOMER = 'GET_CUSTOMER';
+export const REMOVE_CUSTOMER = 'REMOVE_CUSTOMER';

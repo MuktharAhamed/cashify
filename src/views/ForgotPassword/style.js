@@ -1,5 +1,4 @@
 import {StyleSheet} from 'react-native';
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -55,34 +54,34 @@ const styles = StyleSheet.create({
     // backgroundColor : 'white',
     // height : 25,
   },
-  loginbutton: {
-    backgroundColor: 'black',
-  },
+  //   loginbutton: {
+  //     backgroundColor: 'black',
+  //   },
   button: {
     alignItems: 'center',
     marginTop: 40,
   },
-  signIn: {
+  resetPass: {
     width: '100%',
     height: 50,
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 10,
   },
-  textSignIn: {
+  textResetPass: {
     fontSize: 18,
     fontWeight: 'bold',
   },
-  LoginText: {
-    color: 'red',
-    // fontWeight: 'bold',
-    marginVertical: 10,
-  },
-  ForgotPassText: {
-    color: '#009bd1',
-    marginTop: 15,
-    fontSize: 16,
-  },
+  //   LoginText: {
+  //     color: 'red',
+  //     // fontWeight: 'bold',
+  //     marginVertical: 10,
+  //   },
+  //   ForgotPassText: {
+  //     color: '#009bd1',
+  //     marginTop: 15,
+  //     fontSize: 16,
+  //   },
 });
 
 export default styles;
