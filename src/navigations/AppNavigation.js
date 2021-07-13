@@ -34,7 +34,7 @@ import {
   Appearance,
 } from 'react-native-appearance';
 import {DefaultTheme, DarkTheme} from '@react-navigation/native';
-// import {useColorScheme} from 'react-native';
+import {useColorScheme} from 'react-native';
 import Login from 'app-views/Login/Login';
 import Signup from 'app-views/Signup/Signup';
 
