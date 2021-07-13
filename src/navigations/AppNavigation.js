@@ -19,8 +19,12 @@ import ForgotPassword from 'app-views/ForgotPassword';
 import ProductDetail from 'app-views/ProductDetail';
 import ProductListing from 'app-views/ProductListing';
 
+
 import {Provider} from 'react-redux';
-import Cart from 'app-views/Cart';
+//import Cart from 'app-views/Cart';
+
+
+import Cart from 'app-views/Cart/MyCheckList'
 
 import ProductDetailPage from 'app-views/ProductDetailPage';
 import {Appbar} from 'react-native-paper';
@@ -33,16 +37,24 @@ import {DefaultTheme, DarkTheme} from '@react-navigation/native';
 // import {useColorScheme} from 'react-native';
 import Login from 'app-views/Login/Login';
 import Signup from 'app-views/Signup/Signup';
+
 import {PersistGate} from 'redux-persist/integration/react';
 
 // import store
 import store, {persistor} from '../store';
+
+import {useNavigation} from '@react-navigation/native';
+
 
 const Stack = createStackNavigator();
 
 export const RootNavRef = React.createRef();
 
 const AppNavigation = () => {
+
+  const scheme = useColorScheme();
+
+
   const MyDarkTheme = {
     dark: true,
     colors: {
@@ -57,37 +69,38 @@ const AppNavigation = () => {
   return (
     <AppearanceProvider>
 
+
       <Provider store={store}>
         <PersistGate persistor={persistor}>
-          <NavigationContainer ref={RootNavRef}>
-            {/* <Stack.Navigator initialRouteName={NavHome}> */}
-            <Stack.Navigator
-              initialRouteName={NavProductDetailPage}
-              screenOptions={{
-                  header: props => <CustomNavigationBar {...props} />,
-              }}
-            >
-              
-          
-
-         
-          <Stack.Screen
-            name={NavProductListingPage}
-            component={ProductListing}
+            <NavigationContainer ref={RootNavRef}>
+        {/* <Stack.Navigator initialRouteName={NavHome}> */}
+        <Stack.Navigator
+          initialRouteName="Home"
+          screenOptions={{
+            header: props => <CustomNavigationBar {...props} />,
+          }}>
+          <Stack.Screen name={NavHome} component={Home} 
+          options={{ title: 'Super Sales' }}
           />
-              <Stack.Screen name={NavSplashScreen} component={SplashScreen} />
-              <Stack.Screen name={NavLogin} component={Login} />
+          <Stack.Screen name={NavSplashScreen} component={SplashScreen} 
+           options={{ title: 'Super Sales' }}/>
+
+          <Stack.Screen name={NavProductDetailPage} component={ProductDetail}
+           options={{ title: 'Super Sales' }} />
+          <Stack.Screen name={NavLogin} component={Login} />
               <Stack.Screen name={NavSignup} component={Signup} />
               <Stack.Screen
                 name={NavForgotPassword}
                 component={ForgotPassword}
               />
-              <Stack.Screen name={NavHome} component={Home} />
-              <Stack.Screen
-                name={NavProductDetailPage}
-                component={ProductDetail}
-              />
-              <Stack.Screen name={NavCartPage} component={Cart} />
+          <Stack.Screen
+            name={NavProductListingPage}
+            component={ProductListing}
+            options={{ title: 'Super Sales' }}
+          />
+          <Stack.Screen name={NavCartPage} component={Cart} 
+           options={{ title: 'My Cart' }} />
+
             </Stack.Navigator>
           </NavigationContainer>
         </PersistGate>
@@ -97,7 +110,8 @@ const AppNavigation = () => {
   );
 };
 
-function CustomNavigationBar({navigation, previous}) {
+function CustomNavigationBar({navigation, previous,scene}) {
+  const navigate = useNavigation();
   return (
     <Appbar.Header
       style={{
@@ -113,10 +127,10 @@ function CustomNavigationBar({navigation, previous}) {
     >
       {!previous ? <Appbar.Action icon="menu" /> : null}
       {previous ? <Appbar.BackAction onPress={navigation.goBack} /> : null}
-      <Appbar.Content title="SUPER SALES " />
+      <Appbar.Content title={scene.descriptor.options.title} />
       {!previous ? <Appbar.Action icon="bell-ring-outline" /> : null}
-      {!previous ? <Appbar.Action icon="cart-outline" /> : null}
-      {previous ? <Appbar.Action icon="cart-outline" /> : null}
+      {!previous ? <Appbar.Action icon="cart-outline"   onPress={()=>{navigate.navigate(NavCartPage)}}/> : null}
+      {previous ? <Appbar.Action icon="cart-outline" onPress={()=>{navigate.navigate(NavCartPage)}}/> : null}
     </Appbar.Header>
   );
 }

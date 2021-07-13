@@ -1,5 +1,34 @@
 import gql from 'graphql-tag';
 
+export const CheckoutLineAdd = gql`
+mutation checkoutLineItemsAdd($lineItems: [CheckoutLineItemInput!]!, $checkoutId: ID!) {
+  checkoutLineItemsAdd(lineItems: $lineItems, checkoutId: $checkoutId) {
+    checkout {
+      id
+    }
+    checkoutUserErrors {
+      code
+      field
+      message
+    }
+  }
+}`;
+
+export const CheckoutCreate = gql`mutation checkoutCreate($input: CheckoutCreateInput!) {
+  checkoutCreate(input: $input) {
+    checkout {
+      id
+    }
+    checkoutUserErrors {
+      code
+      field
+      message
+    }
+    queueToken
+  }
+}
+`;
+
 const CheckoutFragment = gql`
   fragment CheckoutFragment on Checkout {
     id
