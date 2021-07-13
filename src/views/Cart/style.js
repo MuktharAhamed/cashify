@@ -92,6 +92,12 @@ const style = ScaledSheet.create({
     backgroundColor: "#ffffff",
     color:"#b4b2b2",
     fontSize:12
+  },
+  columnSingleView:{
+    flexDirection: 'column'
+  },
+  rowSingleView:{
+    flexDirection: 'column'
   }
 });
 export default style;
