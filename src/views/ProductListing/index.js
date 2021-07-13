@@ -25,6 +25,18 @@ import styles from 'app-views/ProductListing/style';
 import style from 'app-views/Home/style';
 import {black} from 'react-native-paper/lib/typescript/styles/colors';
 
+
+import {
+  ApolloClient,
+  InMemoryCache,
+  ApolloProvider,
+  useQuery,
+  gql,
+  HttpLink,
+  createHttpLink,
+} from '@apollo/client';
+
+
 const screenWidth = Dimensions.get('window').width;
 const productList = [
   {
@@ -122,8 +134,9 @@ const ProductListing = ({navigation}) => {
           paddingBottom: 4,
           flexDirection: 'row',
           margin: 5,
-        }}
-      >
+
+        }}>
+
         <Text style={{marginHorizontal: 1, fontWeight: 'bold', color: 'black'}}>
           {' '}
           Filters :{' '}
@@ -169,6 +182,7 @@ const ProductListing = ({navigation}) => {
   );
 };
 const ProductBlock = ({item, index}) => {
+
   return (
     <View style={styles.productsContainer}>
       <View
@@ -176,16 +190,18 @@ const ProductBlock = ({item, index}) => {
           flex: 1,
           flexDirection: 'row',
           marginVertical: 10,
-        }}
-      >
+
+        }}>
+
         <View
           style={{
             flex: 5,
             marginLeft: 5,
             alignItems: 'center',
             justifyContent: 'center',
-          }}
-        >
+
+          }}>
+
           <TouchableOpacity>
             <Image source={item.source} style={styles.productsImage} />
           </TouchableOpacity>
@@ -199,8 +215,8 @@ const ProductBlock = ({item, index}) => {
           marginLeft: 5,
           marginTop: 5,
           flex: 1,
-        }}
-      >
+        }}>
+
         <View>
           <Text style={{...styles.productsTitle, height: 45}}>{item.text}</Text>
           <Text style={styles.gradeText}>{item.grade}</Text>
@@ -215,8 +231,9 @@ const ProductBlock = ({item, index}) => {
               alignItems: 'center',
               justifyContent: 'center',
               marginBottom: 5,
-            }}
-          >
+
+            }}>
+
             <Text color="#1877F2" style={styles.addToCartButton}>
               Add to Cart
             </Text>

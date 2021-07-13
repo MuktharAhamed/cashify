@@ -327,11 +327,13 @@ const Login = props => {
               color="#CDCDCD"
               size={25}
             />
+
           </TouchableOpacity>
         </View>
         <TouchableOpacity>
           <Text onPress={navigatToForgotPassword} style={styles.ForgotPassText}>
             Forgot Password?
+
           </Text>
         </TouchableOpacity>
         <View style={styles.errorView}>

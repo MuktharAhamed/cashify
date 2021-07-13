@@ -5,18 +5,23 @@ import {
   NavHome,
   NavSplashScreen,
   NavProductDetailPage,
+
   NavLogin,
   NavSignup,
   NavCartPage,
   NavForgotPassword,
+  NavProductListingPage,
+
 } from 'app-constants/Navigations';
 import Home from 'app-views/Home/Home';
 import SplashScreen from 'app-views/SplashScreen';
 import ForgotPassword from 'app-views/ForgotPassword';
 import ProductDetail from 'app-views/ProductDetail';
 import ProductListing from 'app-views/ProductListing';
+
 import {Provider} from 'react-redux';
 import Cart from 'app-views/Cart';
+
 import ProductDetailPage from 'app-views/ProductDetailPage';
 import {Appbar} from 'react-native-paper';
 import {
@@ -51,6 +56,7 @@ const AppNavigation = () => {
   };
   return (
     <AppearanceProvider>
+
       <Provider store={store}>
         <PersistGate persistor={persistor}>
           <NavigationContainer ref={RootNavRef}>
@@ -58,9 +64,17 @@ const AppNavigation = () => {
             <Stack.Navigator
               initialRouteName={NavProductDetailPage}
               screenOptions={{
-                headerShown: false,
+                  header: props => <CustomNavigationBar {...props} />,
               }}
             >
+              
+          
+
+         
+          <Stack.Screen
+            name={NavProductListingPage}
+            component={ProductListing}
+          />
               <Stack.Screen name={NavSplashScreen} component={SplashScreen} />
               <Stack.Screen name={NavLogin} component={Login} />
               <Stack.Screen name={NavSignup} component={Signup} />
@@ -78,6 +92,7 @@ const AppNavigation = () => {
           </NavigationContainer>
         </PersistGate>
       </Provider>
+
     </AppearanceProvider>
   );
 };

@@ -1,16 +1,16 @@
+
 import store from '../../store/index';
 import {setCustomer} from '../../action/index';
 import {gql, useMutation, useLazyQuery, useQuery} from '@apollo/client';
+
 import {
-  NavSplashScreen,
-  NavProductDetailPage,
   NavCartPage,
+  NavProductDetailPage,
   NavLogin,
   NavSignup,
   NavProductListingPage,
 } from 'app-constants/Navigations';
 import {connect} from 'react-redux';
-
 import React, {useEffect} from 'react';
 import {
   ScrollView,

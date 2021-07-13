@@ -1,8 +1,10 @@
 import React, {useEffect} from 'react';
+
 import {
   GraphqlAdminApi,
   GraphqlStoreFrontApi,
 } from 'app-constants/GraphqlConstants';
+
 import {
   ScrollView,
   View,
@@ -27,23 +29,23 @@ import style from 'app-views/Home/style';
 // import gql from 'graphql-tag';
 
 const query = gql`
-  query MyQuery {
-    collections(first: 10) {
-      edges {
-        node {
-          products(first: 10) {
-            edges {
-              node {
-                variants(first: 10) {
-                  edges {
-                    node {
-                      id
-                      price
-                      quantityAvailable
-                    }
-                  }
-                }
-              }
+
+  query query {
+    shop {
+      name
+      description
+      products(first: 20) {
+        edges {
+          node {
+            id
+            title
+            metafield(
+              key: "related_products"
+              namespace: "Products_metafields"
+            ) {
+              namespace
+              value
+
             }
           }
         }
@@ -60,6 +62,7 @@ const lists = [
   {source: require('app-assets/brands/samsung.jpg')},
 ];
 const ByBrand = () => {
+
   const {loading, error, data} = useQuery(query, {
     context: GraphqlStoreFrontApi,
   });
@@ -69,6 +72,7 @@ const ByBrand = () => {
     console.log('error.message', error);
   }
   console.log('data', data);
+
 
   return (
     <>
