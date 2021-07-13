@@ -5,6 +5,9 @@ const style = StyleSheet.create({
     flex: 1,
     // backgroundColor: 'lightgreen',
   },
+  errorText: {
+    color: 'red',
+  },
   boxview: {
     width: '90%',
     alignSelf: 'center',
