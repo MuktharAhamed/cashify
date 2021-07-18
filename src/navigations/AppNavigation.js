@@ -22,7 +22,7 @@ import {Provider} from 'react-redux';
 
 import Cart from 'app-views/Cart/MyCheckList';
 
-import ProductDetailPage from 'app-views/ProductDetailPage';
+// import ProductDetailPage from 'app-views/ProductDetailPage';
 import {Appbar} from 'react-native-paper';
 import {
   AppearanceProvider,
@@ -66,7 +66,7 @@ const AppNavigation = () => {
           <NavigationContainer ref={RootNavRef}>
             {/* <Stack.Navigator initialRouteName={NavHome}> */}
             <Stack.Navigator
-              initialRouteName={NavProductDetailPage}
+              initialRouteName={NavHome}
               screenOptions={{
                 header: props => <CustomNavigationBar {...props} />,
               }}
