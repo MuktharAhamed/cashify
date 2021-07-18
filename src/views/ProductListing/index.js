@@ -1,4 +1,4 @@
-import * as ProductConstants from 'app-constants/ProductConstants.js'
+import * as ProductConstants from 'app-constants/ProductConstants.js';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import React, {useEffect, useState} from 'react';
 import {
@@ -42,7 +42,7 @@ import {
 
 const query = gql`
   query productsfilter($collectionquery: String!) {
-    collections(query: $collectionquery, first: 10) {      
+    collections(query: $collectionquery, first: 10) {
       edges {
         node {
           title
@@ -158,89 +158,105 @@ const ProductListing = props => {
   }, []);
 
   useEffect(() => {
-     console.log("productError");
-     console.log(productError);
+    console.log('productError');
+    console.log(productError);
     if (!productLoading && !productError && data != undefined) {
-      
-      
-      if(data.collections.edges.length > 0){
+      if (data.collections.edges.length > 0) {
         var allVariants = [];
-        console.log("data.collections.edges");
+        console.log('data.collections.edges');
         console.log(data.collections.edges);
         data.collections.edges.forEach(collection => {
-          
-          if(collection.node?.products?.edges?.length > 0)
-          {
+          if (collection.node?.products?.edges?.length > 0) {
             collection.node?.products?.edges.forEach(product => {
               // console.log("product");
-              
+
               //  console.log(product);
-            var varient = {};
-            varient.productid = product.node.id;
-            varient.productname = product.node.title;
-            // console.log()
-            varient.image = product.node.images.edges.length > 0? product.node.images.edges[0]?.node.src:'';
-           if(product.node.variants.edges.length > 0)
-          {
-            if(collection.node.title?.toLowerCase().includes(ProductConstants.PRODUCT_GRADE))
-            {
-              var currentProductVariant = {...varient};
-              // console.log("productVariant");
-              product.node.variants.edges.forEach(a => {
-                // if(a.)
-                var currentProdGrade = a.node.selectedOptions.find(
-                  x => x.name.toLowerCase() == ProductConstants.PRODUCT_GRADE,
-                )?.value;
-                // console.log(currentProdGrade);
-                // console.log("aasdf234");
-                // console.log("filters.filter(a=>a.isselected)"); 
-                // if(product.node.title== "IPHONE 7")
-                // {
-                //   console.log("a.node.selectedOptions");
-                //   console.log(a.node.selectedOptions);
-                // }
-                var selectedFilters = filters.filter(a=>a.isselected && a.text.includes(currentProdGrade));
-                
-                // console.log("selectedFilters");
-                // console.log(selectedFilters);
-                if(props.route.params.text == currentProdGrade || selectedFilters.length > 0)
-                {
-                  // console.log("aasdf");
-                  // console.log(a);
+              var varient = {};
+              varient.productid = product.node.id;
+              varient.productname = product.node.title;
+              // console.log()
+              varient.image =
+                product.node.images.edges.length > 0
+                  ? product.node.images.edges[0]?.node.src
+                  : '';
+              if (product.node.variants.edges.length > 0) {
+                if (
+                  collection.node.title
+                    ?.toLowerCase()
+                    .includes(ProductConstants.PRODUCT_GRADE)
+                ) {
                   var currentProductVariant = {...varient};
-                  currentProductVariant.grade = currentProdGrade;
-              currentProductVariant.varientid = a.node?.id;
-              currentProductVariant.price = a.node?.price;
-              currentProductVariant.quantity = a.node?.quantityAvailable;
-              currentProductVariant.varientname = a.node?.title;
-              if(!allVariants?.some(a=> a.varientid == currentProductVariant.varientid))
-              {
-              allVariants.push(currentProductVariant);
-                 } 
+                  // console.log("productVariant");
+                  product.node.variants.edges.forEach(a => {
+                    // if(a.)
+                    var currentProdGrade = a.node.selectedOptions.find(
+                      x =>
+                        x.name.toLowerCase() == ProductConstants.PRODUCT_GRADE,
+                    )?.value;
+                    // console.log(currentProdGrade);
+                    // console.log("aasdf234");
+                    // console.log("filters.filter(a=>a.isselected)");
+                    // if(product.node.title== "IPHONE 7")
+                    // {
+                    //   console.log("a.node.selectedOptions");
+                    //   console.log(a.node.selectedOptions);
+                    // }
+                    var selectedFilters = filters.filter(
+                      a => a.isselected && a.text.includes(currentProdGrade),
+                    );
+
+                    // console.log("selectedFilters");
+                    // console.log(selectedFilters);
+                    if (
+                      props.route.params.text == currentProdGrade ||
+                      selectedFilters.length > 0
+                    ) {
+                      // console.log("aasdf");
+                      // console.log(a);
+                      var currentProductVariant = {...varient};
+                      currentProductVariant.grade = currentProdGrade;
+                      currentProductVariant.varientid = a.node?.id;
+                      currentProductVariant.price = a.node?.price;
+                      currentProductVariant.quantity =
+                        a.node?.quantityAvailable;
+                      currentProductVariant.varientname = a.node?.title;
+                      if (
+                        !allVariants?.some(
+                          a => a.varientid == currentProductVariant.varientid,
+                        )
+                      ) {
+                        allVariants.push(currentProductVariant);
+                      }
+                    }
+                  });
+                  // console.log(product.node.variants);
+                } else {
+                  var currentProductVariant = {...varient};
+                  currentProductVariant.grade =
+                    product.node.variants.edges[0].node.selectedOptions.find(
+                      x =>
+                        x.name.toLowerCase() == ProductConstants.PRODUCT_GRADE,
+                    )?.value;
+                  currentProductVariant.varientid =
+                    product.node.variants.edges[0].node?.id;
+                  currentProductVariant.price =
+                    product.node.variants.edges[0].node?.price;
+                  currentProductVariant.quantity =
+                    product.node.variants.edges[0].node?.quantityAvailable;
+                  currentProductVariant.varientname =
+                    product.node.variants.edges[0].node?.title;
+                  if (
+                    !allVariants?.some(
+                      a => a.varientid == currentProductVariant.varientid,
+                    )
+                  ) {
+                    allVariants.push(currentProductVariant);
+                  }
                 }
-              });
-              // console.log(product.node.variants);
-            }
-            else
-            {
-              var currentProductVariant = {...varient};
-              currentProductVariant.grade = product.node.variants.edges[0].node.selectedOptions.find(
-                x => x.name.toLowerCase() == ProductConstants.PRODUCT_GRADE,
-              )?.value;
-              currentProductVariant.varientid = product.node.variants.edges[0].node?.id;
-              currentProductVariant.price = product.node.variants.edges[0].node?.price;
-              currentProductVariant.quantity = product.node.variants.edges[0].node?.quantityAvailable;
-              currentProductVariant.varientname = product.node.variants.edges[0].node?.title;
-              if(!allVariants?.some(a=> a.varientid == currentProductVariant.varientid))
-              {
-              allVariants.push(currentProductVariant);
               }
-            }
-          }
-           
             });
           }
-        })
+        });
         setCurrentVariant(allVariants);
       }
       // const selectedfilters = [];
@@ -255,44 +271,44 @@ const ProductListing = props => {
       // }
       // console.log('selectedfilters', selectedfilters);
       // if (data !== undefined) {
-        // var products = data.shop.collections.edges[0].node.products.edges;
-        // // console.log(products,"products");
-        // products.forEach(x => {
-        //   x.node.variants.edges.filter(c => {
-        //     varient.productid = x.node.id;
-        //     varient.productname = x.node.title;
-        //     varient.image = x.node.images.edges[0]?.node.src;
-        //     varient.varientid = c.node.id;
-        //     varient.price = c.node.price;
-        //     varient.quantity = c.node.quantityAvailable;
-        //     varient.varientname = c.node.title;
-        //     c.node.selectedOptions.forEach(v => {
-        //       // console.log('x.node.title', x.node.title);
-        //       // console.log('appleselected', appleselected);
-        //       if (
-        //         v.name.toLowerCase() == 'grade' && !selectedfilters.length > 0
-        //           ? v.value.toLowerCase() ==
-        //             props.route.params.text.toLowerCase()
-        //           : // &&
-        //             // selectedfilters.length > 0 &&
-        //             selectedfilters.includes(v.value.toLowerCase())
-        //         // &&
-        //         // appleselected ===true &&
-        //         // x.node.title.toLowerCase().includes('apple')
-        //       ) {
-        //         // console.log('bothgrades', v.value.toLowerCase());
-        //         // console.log('appleselected', appleselected);
-        //         varient['grade'] = v.value;
-        //         allVariants.push(varient);
-        //         varient = {};
-        //       }
-        //     });
-        //   });
-        // });
-        // setCurrentVariant(allVariants);
+      // var products = data.shop.collections.edges[0].node.products.edges;
+      // // console.log(products,"products");
+      // products.forEach(x => {
+      //   x.node.variants.edges.filter(c => {
+      //     varient.productid = x.node.id;
+      //     varient.productname = x.node.title;
+      //     varient.image = x.node.images.edges[0]?.node.src;
+      //     varient.varientid = c.node.id;
+      //     varient.price = c.node.price;
+      //     varient.quantity = c.node.quantityAvailable;
+      //     varient.varientname = c.node.title;
+      //     c.node.selectedOptions.forEach(v => {
+      //       // console.log('x.node.title', x.node.title);
+      //       // console.log('appleselected', appleselected);
+      //       if (
+      //         v.name.toLowerCase() == 'grade' && !selectedfilters.length > 0
+      //           ? v.value.toLowerCase() ==
+      //             props.route.params.text.toLowerCase()
+      //           : // &&
+      //             // selectedfilters.length > 0 &&
+      //             selectedfilters.includes(v.value.toLowerCase())
+      //         // &&
+      //         // appleselected ===true &&
+      //         // x.node.title.toLowerCase().includes('apple')
+      //       ) {
+      //         // console.log('bothgrades', v.value.toLowerCase());
+      //         // console.log('appleselected', appleselected);
+      //         varient['grade'] = v.value;
+      //         allVariants.push(varient);
+      //         varient = {};
+      //       }
+      //     });
+      //   });
+      // });
+      // setCurrentVariant(allVariants);
       // }
     }
-  }, [data,productLoading]);
+  }, [data, productLoading]);
 
   // const [gradeaselected, setGradeaselected] = useState(false);
   // const [gradebselected, setGradebselected] = useState(false);
@@ -301,29 +317,31 @@ const ProductListing = props => {
   // const [redmiselected, setRedmiselected] = useState(false);
   // const [rateselected, setRateselected] = useState(false);
 
-  useEffect(()=> {
-    console.log("hit");
-    if(filters.some(a=>a.isselected))
-    {
-      var existingFilters = ["title:\"Grade " + props.route.params.text + "\""]
-     var selectedQuery = filters.filter(a=>a.isselected).map(x=> "title:\"" + x.text + "\"");
-    var filterQuery = [...existingFilters,...selectedQuery].join(" OR ");
-    console.log("filterQuery");
-    console.log(filterQuery);
-    try {
-      // console.log('propsload');
-      getProductsByQuery({
-        context: GraphqlStoreFrontApi,
-        variables: {
-          collectionquery: filterQuery,
-        },
-      });
-    } catch (e) {
-      console.log(e);
+  useEffect(() => {
+    console.log('hit');
+    if (filters.some(a => a.isselected)) {
+      // var existingFilters = ["title:\"Grade " + props.route.params.text + "\""]
+      var existingFilters = [`title:\"Grade ${props.route.params.text}"`];
+      var selectedQuery = filters
+        .filter(a => a.isselected)
+        .map(x => `title:\"${x.text}\"`);
+      var filterQuery = [...existingFilters, ...selectedQuery].join(' OR ');
+      console.log('filterQuery');
+      console.log(filterQuery);
+      try {
+        // console.log('propsload');
+        getProductsByQuery({
+          context: GraphqlStoreFrontApi,
+          variables: {
+            collectionquery: filterQuery,
+          },
+        });
+      } catch (e) {
+        console.log(e);
+      }
     }
-  }
+  }, [filters]);
 
-  },[filters]);
   // useEffect(() => {
   //   if (!productLoading && productError != null) {
   //     try {
@@ -393,10 +411,8 @@ const ProductListing = props => {
   //   setRateselected(!rateselected);
   // };
 
-  
-
   const addSelectedFilter = text => {
-    console.log("addSelectedFilter")
+    console.log('addSelectedFilter');
     updateFilters(prev => {
       // const existingFilters = prev;
       var selectedFilterIndex = prev.findIndex(x => x.text == text);
@@ -504,13 +520,15 @@ const ProductBlock = ({item, index}) => {
           }}
         >
           <TouchableOpacity>
-            {
-              item.image == '' &&
-              <Image source={require('app-assets/no-image.jpg')} style={styles.productsImage} />
-            }
-            {item.image != '' &&
-            <Image source={{uri: item.image}} style={styles.productsImage} />
-          }
+            {item.image == '' && (
+              <Image
+                source={require('app-assets/no-image.jpg')}
+                style={styles.productsImage}
+              />
+            )}
+            {item.image != '' && (
+              <Image source={{uri: item.image}} style={styles.productsImage} />
+            )}
           </TouchableOpacity>
         </View>
         <View style={{flex: 1, paddingHorizontal: 5}}>
