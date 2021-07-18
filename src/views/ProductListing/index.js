@@ -21,7 +21,6 @@ import TodaysDeals from 'app-views/Home/TodaysDeals';
 import styles from 'app-views/ProductListing/style';
 import style from 'app-views/Home/style';
 import {black} from 'react-native-paper/lib/typescript/styles/colors';
-
 import {
   ApolloClient,
   InMemoryCache,
@@ -31,11 +30,14 @@ import {
   HttpLink,
   createHttpLink,
   useMutation,
+  useLazyQuery,
 } from '@apollo/client';
 
 import {event} from 'react-native-reanimated';
-import {Button} from 'react-native-paper';
-
+import {
+  GraphqlAdminApi,
+  GraphqlStoreFrontApi,
+} from 'app-constants/GraphqlConstants';
 // const query = gql`
 //   query query($tag: String!) {
 //     shop {
@@ -68,7 +70,7 @@ const query = gql`
   query productsfilter($collectionquery: String!) {
     shop {
       name
-      collections(query: $collectionquery, first: 1) {
+      collections(query: $collectionquery, first: 4) {
         edges {
           node {
             products(first: 10) {
@@ -195,43 +197,90 @@ const productList = [
 ];
 const ProductListing = props => {
   console.log('propsnavigation', `title:GRADE ` + props.route.params.text);
-  const [querytag, setquerytag] = useState(
-    `title:GRADE ` + props.route.params.text,
-  );
-  const {loading, data, error} = useQuery(query, {
-    variables: {collectionquery: querytag},
+  const [gradetype, setGradetype] = useState(props.route.params.text);
+  const [querytag, setquerytag] = useState(`title:GRADE ` + gradetype);
+  // const {loading, data, error} = useQuery(query, {
+  //   context: GraphqlStoreFrontApi,
+  //   variables: {collectionquery: querytag},
+  // });
+  const [
+    getProductsByQuery,
+    {loading: productLoading, error: CustomerError, data},
+  ] = useLazyQuery(query, {
+    fetchPolicy: 'network-only',
   });
   const [currentVariant, setCurrentVariant] = useState([]);
   let allVariants = [];
   let varient = {};
   console.log('pro', data);
+  // console.log('loading', loading);
+  // console.log('error', error);
+
   useEffect(() => {
-    if (!loading) {
-      console.log('data', data.shop.collections.edges[0].node.products.edges);
-      var products = data.shop.collections.edges[0].node.products.edges;
-      products.forEach(x => {
-        varient.productid = x.node.id;
-        varient.productname = x.node.title;
-        varient.image = x.node.images.edges[0]?.node.src;
-        x.node.variants.edges.filter(c => {
-          varient.varientid = c.node.id;
-          varient.price = c.node.price;
-          varient.quantity = c.node.quantityAvailable;
-          varient.varientname = c.node.title;
-          c.node.selectedOptions.forEach(v => {
-            if (
-              v.name.toLowerCase() == 'grade' &&
-              v.value.toLowerCase() ==
-                'grade_' + props.route.params.text.toLowerCase()
-            ) {
-              varient['grade'] = v.value;
-              allVariants.push(varient);
-              varient = {};
-              // console.log('currentVariant', allVariants);
-            }
+    if (!productLoading) {
+      try {
+        console.log('propsload');
+        getProductsByQuery({
+          context: GraphqlStoreFrontApi,
+          variables: {collectionquery: querytag},
+        });
+      } catch (e) {
+        console.log(e);
+      }
+    }
+  }, [props]);
+
+  useEffect(() => {
+    if (!productLoading) {
+      console.log('data', data);
+      const selectedfilters = [];
+      if (gradeaselected) {
+        selectedfilters.push('a');
+      }
+      if (gradebselected) {
+        selectedfilters.push('b');
+      }
+      if (appleselected) {
+        selectedfilters.push('apple');
+      }
+      // console.log('selectedfilters', selectedfilters);
+      if (data !== undefined) {
+        var products = data.shop.collections.edges[0].node.products.edges;
+        // console.log(products,"products");
+        products.forEach(x => {
+          x.node.variants.edges.filter(c => {
+            varient.productid = x.node.id;
+            varient.productname = x.node.title;
+            varient.image = x.node.images.edges[0]?.node.src;
+            varient.varientid = c.node.id;
+            varient.price = c.node.price;
+            varient.quantity = c.node.quantityAvailable;
+            varient.varientname = c.node.title;
+            c.node.selectedOptions.forEach(v => {
+              // console.log('x.node.title', x.node.title);
+              // console.log('appleselected', appleselected);
+              if (
+                v.name.toLowerCase() == 'grade' && !selectedfilters.length > 0
+                  ? v.value.toLowerCase() ==
+                    props.route.params.text.toLowerCase()
+                  : // &&
+                    // selectedfilters.length > 0 &&
+                    selectedfilters.includes(v.value.toLowerCase()) 
+                    // &&
+                    // appleselected ===true &&
+                    // x.node.title.toLowerCase().includes('apple')
+              ) {
+                // console.log('bothgrades', v.value.toLowerCase());
+                // console.log('appleselected', appleselected);
+                varient['grade'] = v.value;
+                allVariants.push(varient);
+                varient = {};
+              }
+            });
           });
         });
-      });
+        setCurrentVariant(allVariants);
+      }
     }
   }, [data]);
 
@@ -241,6 +290,61 @@ const ProductListing = props => {
   const [samsungselected, setSamsungselected] = useState(false);
   const [redmiselected, setRedmiselected] = useState(false);
   const [rateselected, setRateselected] = useState(false);
+
+  useEffect(() => {
+    if (!productLoading) {
+      try {
+        let selectedfilters;
+        if (gradeaselected) {
+          selectedfilters = 'title:"GRADE A"';
+        }
+        if (gradebselected) {
+          if (selectedfilters) {
+            selectedfilters += ' OR ';
+          }
+          selectedfilters =
+            (selectedfilters ? selectedfilters : '') +
+            'title:' +
+            (gradebselected ? '"GRADE B"' : '');
+        }
+        if (appleselected) {
+          if (selectedfilters) {
+            selectedfilters += ' OR ';
+          }
+          selectedfilters =
+            (selectedfilters ? selectedfilters : '') +
+            'title:' +
+            (appleselected ? '"APPLE"' : '');
+        }
+        console.log('selectedfilters', selectedfilters);
+        console.log('propsload');
+        if (selectedfilters) {
+          getProductsByQuery({
+            context: GraphqlStoreFrontApi,
+            variables: {
+              collectionquery: selectedfilters,
+              // ? selectedfilters
+              // : 'title:GRADE ' + gradetype,
+            },
+          });
+        } else {
+          getProductsByQuery({
+            context: GraphqlStoreFrontApi,
+            variables: {collectionquery: `title:GRADE ` + gradetype},
+          });
+        }
+      } catch (e) {
+        console.log(e);
+      }
+    }
+  }, [
+    gradeaselected,
+    gradebselected,
+    appleselected,
+    samsungselected,
+    redmiselected,
+    rateselected,
+  ]);
 
   const handlegradeaselectedfilter = () => {
     setGradeaselected(!gradeaselected);
@@ -328,8 +432,8 @@ const ProductListing = props => {
         </View>
       </ScrollView>
       <FlatList
-        data={allVariants} //allVariants
-        keyExtractor={item => item.id} //has to be unique
+        data={currentVariant} //allVariants
+        keyExtractor={item => item.varientid} //has to be unique
         renderItem={ProductBlock} //method to render the data in the way you want using styling u need
         horizontal={false}
         numColumns={2}
@@ -383,7 +487,7 @@ const ProductBlock = ({item, index}) => {
           }}
         >
           <TouchableOpacity>
-            <Image source={item.image} style={styles.productsImage} />
+            <Image source={{uri: item.image}} style={styles.productsImage} />
           </TouchableOpacity>
         </View>
         <View style={{flex: 1, paddingHorizontal: 5}}>
@@ -399,9 +503,9 @@ const ProductBlock = ({item, index}) => {
       >
         <View>
           <Text style={{...styles.productsTitle, height: 45}}>
-            {item.productname + item.varientname}
+            {item.productname + ' ' + item.varientname}
           </Text>
-          <Text style={styles.gradeText}>{item.grade}</Text>
+          <Text style={styles.gradeText}>{`GRADE ` + item.grade}</Text>
           <Text style={[{...styles.productsTitle, color: '#F08080'}]}>
             {item.price}
           </Text>
