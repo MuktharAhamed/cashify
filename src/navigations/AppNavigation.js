@@ -66,7 +66,7 @@ const AppNavigation = () => {
           <NavigationContainer ref={RootNavRef}>
             {/* <Stack.Navigator initialRouteName={NavHome}> */}
             <Stack.Navigator
-              initialRouteName={NavProductDetailPage}
+              initialRouteName={NavHome}
               screenOptions={{
                 header: props => <CustomNavigationBar {...props} />,
               }}
