@@ -66,12 +66,14 @@ const Subelements = ({text, color}) => {
   console.log(color, 'color');
   const navigation = useNavigation();
 
-  const navtoProductListing = () => {
-    navigation.navigate(NavProductListingPage);
+  const navtoProductListing = text => {
+    navigation.navigate(NavProductListingPage, {
+      text,
+    });
   };
   return (
     <View>
-      <TouchableNativeFeedback onPress={navtoProductListing}>
+      <TouchableNativeFeedback onPress={() => navtoProductListing(text)}>
         <View style={style.boxview}>
           <Text
             style={[
