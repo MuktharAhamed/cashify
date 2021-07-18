@@ -22,7 +22,6 @@ import {Provider} from 'react-redux';
 
 import Cart from 'app-views/Cart/MyCheckList';
 
-import ProductDetailPage from 'app-views/ProductDetailPage';
 import {Appbar} from 'react-native-paper';
 import {
   AppearanceProvider,
