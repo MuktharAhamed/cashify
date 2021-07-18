@@ -1,40 +1,29 @@
-import AccordionOptions from './AccordionOptions';
-// color: `#42c8b7`,
+import ProductAvailableOptions from './ProductAvailableOptions';
 import base64 from 'base-64';
 import utf8 from 'utf8';
 import {gql, useMutation, useLazyQuery, useQuery} from '@apollo/client';
-import {
-  GraphqlAdminApi,
-  GraphqlStoreFrontApi,
-} from 'app-constants/GraphqlConstants';
-import {useNavigation} from '@react-navigation/core';
-import {NavHome} from 'app-constants/Navigations';
+import {GraphqlAdminApi} from 'app-constants/GraphqlConstants';
+import * as Constants from 'app-constants/ProductConstants';
 import React, {useState, useEffect} from 'react';
-import ProductService from '../../utils/ProductService';
+import ProductImageZoom from './ProductZoom';
+import SampleImagesSlider from './SampleImagesSlider';
+// import Specifications from './Specifications';
 import {
-  Modal,
   Image,
-  SafeAreaView,
-  Dimensions,
+  TouchableWithoutFeedback,
   ScrollView,
   View,
   TouchableOpacity,
-  LayoutAnimation,
   Text,
   TextInput,
-  UIManager,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Button} from 'react-native-paper';
 import RelatedProducts from './relatedProducts';
-import Slider from 'app-components/Slider/Slider';
 import styles from 'app-views/ProductDetail/style';
-// import ImageViewer from 'react-native-image-zoom-viewer';
-import ImageZoom from 'react-native-image-pan-zoom';
-import {color} from 'react-native-reanimated';
-// import ImageView from  "react-native-image-viewing";
+import Specifications from './Specifications';
+
 const ProductDetail = props => {
-  ////https://www.npmjs.com/package/react-native-image-zoom-viewer
   const zoomImages = [
     {
       props: {
@@ -43,68 +32,36 @@ const ProductDetail = props => {
       },
     },
   ];
-  const DefaultExpandState = {
-    SIZE: false,
-    COLOR: false,
-    GRADE: false,
-  };
-  const product = {
-    title: 'Realme X 128 GB Grade D',
-    grade: {
-      grade: 'A',
-    },
-    price: '₹6,110',
-    source: require('app-assets/mob/mobile1.jpg'),
-  };
-  const RamAttribute = [
-    {
-      isSelected: false,
-      title: '16 GB',
-    },
-    {
-      isSelected: true,
-      title: '8 GB',
-    },
-  ];
 
-  const ColorAttribute = [
-    {
-      isSelected: true,
-      title: 'Black',
-    },
-  ];
-
-  const Gradeattribute = [
-    {
-      isSelected: true,
-      title: 'Grade A',
-    },
-    {
-      isSelected: false,
-      title: 'Grade C',
-    },
-    {
-      isSelected: false,
-      title: 'Grade B',
-    },
-  ];
-
-  const allAttributes = [
-    {
-      title: 'SIZE',
-      availableOptions: RamAttribute,
-    },
-    {
-      title: 'COLOR',
-      availableOptions: ColorAttribute,
-    },
-    {
-      title: 'GRADE',
-      availableOptions: Gradeattribute,
-    },
-  ];
-  // const {productId} = route.params;
-  // const [product,setProduct] = useState({});
+  const relatedProductQuery = gql`
+    query getRelatedProducts($input: String!) {
+      productVariants(first: 5, query: $input) {
+        edges {
+          node {
+            id
+            inventoryQuantity
+            title
+            selectedOptions {
+              name
+              value
+            }
+            price
+            product {
+              id
+              images(first: 1) {
+                edges {
+                  node {
+                    originalSrc
+                  }
+                }
+              }
+              title
+            }
+          }
+        }
+      }
+    }
+  `;
   const getProductQuery = gql`
     query getProductQuery($input: ID!) {
       product(id: $input) {
@@ -119,7 +76,7 @@ const ProductDetail = props => {
             }
           }
         }
-        metafields(first: 10) {
+        metafields(first: 50) {
           edges {
             node {
               key
@@ -145,17 +102,23 @@ const ProductDetail = props => {
       }
     }
   `;
-  // const [
-  //   getProductByQuery,
-  //   {loading: productLaoding, error: productError, data: productData},
-  // ] = useLazyQuery(getProductQuery);
-  const {loading, error, data} = useQuery(getProductQuery, {
-    context: GraphqlAdminApi,
-    variables: {
-      input: 'Z2lkOi8vc2hvcGlmeS9Qcm9kdWN0LzY4MTUwOTcyMjUzNzI=',
+
+  const [fetchProductQuery, {loading, error, data}] = useLazyQuery(
+    getProductQuery,
+    {
+      fetchPolicy: 'network-only',
     },
+  );
+  const [
+    getRelatedProducts,
+    {
+      loading: relatedProdLoading,
+      error: relatedProdError,
+      data: relatedProdData,
+    },
+  ] = useLazyQuery(relatedProductQuery, {
+    fetchPolicy: 'network-only',
   });
-  // console.log(data);
   const defaultProd = {
     imgUrl: {
       id: '',
@@ -165,47 +128,14 @@ const ProductDetail = props => {
     productId: '',
   };
 
-  // const availableOption = [
-  //   {
-  //     isSelected: false,
-  //     title: '',
-  //   },
-  // ],
-
-  // const allAvailableOptions = [
-  //   {
-  //     title: 'SIZE',
-  //     availableOptions: availableOption,
-  //   },
-  //   {
-  //     title: 'COLOR',
-  //     availableOptions: availableOption,
-  //   },
-  //   {
-  //     title: 'GRADE',
-  //     availableOptions: availableOption,
-  //   },
-  // ];
-  const [currentProduct, setSeletctedProduct] = useState(defaultProd);
   const [relatedProducts, setRelatedProducts] = useState([{}]);
-  const [allSizes, setSizeOptions] = useState([]);
-  const [allColors, setColorOptions] = useState([]);
-  const [allGrades, setGradeOptions] = useState([]);
+  const [showRelatedProducts, setShowRelatedProducts] = useState(false);
   const [availableVariants, setAllAvailableVariants] = useState([]);
   const [zoomProductImage, setZoomProductImage] = useState(false);
   const [qtyValue, setQtyInputText] = useState('1');
   const [selectedVariant, setSelectedVariant] = useState({});
-  const [expandedState, setExpandedState] = useState(DefaultExpandState);
+  const [showSampleImages, setShowSampleImages] = useState(false);
   const [isProductFetched, setIsProductFetched] = useState(false);
-
-  const toggleExpand = groupName => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    setExpandedState(prev => {
-      var newState = {...prev};
-      newState[groupName] = !prev[groupName];
-      return newState;
-    });
-  };
 
   const quantityTextHandler = e => {
     setQtyInputText(e.replace(/[^0-9]/g, ''));
@@ -227,402 +157,216 @@ const ProductDetail = props => {
     });
   };
 
-  // const groupBy = (objectArray, property) => {
-  //   return objectArray.reduce((acc, obj) => {
-  //     const key = obj[property];
-  //     if (!acc[key]) {
-  //       acc[key] = [];
-  //     }
-  //     // Add object to list for given key's value
-  //     acc[key].push(obj);
-  //     return acc;
-  //   }, {});
-  // };
-  const unique = (array, prop) => {
-    const keyValueArray = array.map(entry => [entry[prop], entry]);
-    const map = new Map(keyValueArray);
-    return Array.from(map.values());
+  const showsampleImagesHandler = () => {
+    setShowSampleImages(!showSampleImages);
   };
 
   useEffect(() => {
-    // console.log('Hite');
+    console.log('relatedProdError');
+    if (
+      !relatedProdLoading &&
+      relatedProdData &&
+      !relatedProdError &&
+      selectedVariant != null
+    ) {
+      console.log('relatedProdError 2');
+      if (relatedProdData.productVariants.edges.length > 0) {
+        var allRelatedProducts = [];
+        relatedProdData.productVariants.edges.forEach(currentProd => {
+          var relatedProd = {};
+          const productIdBytes = utf8.encode(currentProd.node.product.id);
+          relatedProd.productId = base64.encode(productIdBytes);
+          if (relatedProd.productId == selectedVariant.productId) return;
+          if (
+            allRelatedProducts.some(
+              prd => prd.productId == relatedProd.productId,
+            )
+          ) {
+            return;
+          }
+          const utf8Bytes = utf8.encode(currentProd.node.id);
+          relatedProd.title = currentProd?.node?.product?.title;
+          if (currentProd?.node?.product?.images?.edges?.length > 0) {
+            relatedProd.ImageUrl =
+              currentProd?.node?.product?.images?.edges[0].node.originalSrc;
+          } else {
+            relatedProd.ImageUrl = '';
+          }
+          relatedProd.variantId = base64.encode(utf8Bytes);
+          relatedProd.price = currentProd.node.price;
+          relatedProd.grade = currentProd.node.selectedOptions.find(
+            x => x.name.toLowerCase() == Constants.PRODUCT_GRADE,
+          )?.value;
+          relatedProd.size = currentProd.node.selectedOptions.find(
+            x => x.name.toLowerCase() == Constants.PRODUCT_SIZE,
+          )?.value;
+          relatedProd.ram = currentProd.node.selectedOptions.find(
+            x => x.name.toLowerCase() == Constants.PRODUCT_RAM,
+          )?.value;
+          allRelatedProducts.push(relatedProd);
+        });
+        setRelatedProducts(allRelatedProducts);
+        setShowRelatedProducts(true);
+      }
+    }
+  }, [relatedProdData, relatedProdLoading]);
+
+  useEffect(() => {
     if (!loading && data != null) {
       if (error) {
-        // console.log(error);
+        console.log(error);
       } else {
-        const prodDetails = {};
+        const imageData = {};
         if (data.product.images.edges.length > 0) {
-          const imageData = {
-            id: data.product.images.edges[0].node.id,
-            imgSrc: data.product.images.edges[0].node.originalSrc,
-          };
-          prodDetails.imgUrl = imageData;
+          imageData.id = data.product.images.edges[0].node.id;
+          imageData.imgSrc = data.product.images.edges[0].node.originalSrc;
         }
-        prodDetails.productTitle = data.product.title;
-        prodDetails.productId = data.product.id;
-        setSeletctedProduct(prodDetails);
-        console.log('data.product');
+        // console.log('data.prod.metafields');
+        console.log(data.product);
+        // console.log('data.prod.metafields2');
+        console.log(data.product.metafields?.edges);
+        // var metafields =
+        const prodBytes = utf8.encode(data.product.id);
+        const prodId = base64.encode(prodBytes);
         const allVariants = [];
         data.product.variants.edges.forEach(x => {
-          console.log(x);
-          console.log(x.node.inventoryQuantity);
-          // if (x.node.inventoryQuantity > 0) {
-          const utf8Bytes = utf8.encode(x.node.id);
-          console.log('title');
-          allVariants.push({
-            id: base64.encode(utf8Bytes),
-            title: x.node.title,
-            price: x.node.price,
-            // selectedOption: x.node.selectedOptions,
-            grade: x.node.selectedOptions.find(
-              x => x.name.toLowerCase() == 'grade',
-            )?.value,
-            color: x.node.selectedOptions.find(
-              x => x.name.toLowerCase() == 'color',
-            )?.value,
-            size: x.node.selectedOptions.find(
-              x => x.name.toLowerCase() == 'size',
-            )?.value,
-          });
-          // }
+          if (x.node.inventoryQuantity > 0) {
+            const utf8Bytes = utf8.encode(x.node.id);
+            allVariants.push({
+              productTitle: data.product.title,
+              productId: prodId,
+              imgUrl: imageData,
+              specs:
+                data.product.metafields?.edges.length > 0
+                  ? data.product.metafields?.edges
+                  : null,
+              id: base64.encode(utf8Bytes),
+              title: x.node.title.replace('/', ' '),
+              price: x.node.price,
+              grade: x.node.selectedOptions.find(
+                x => x.name.toLowerCase() == Constants.PRODUCT_GRADE,
+              )?.value,
+              ram: x.node.selectedOptions.find(
+                x => x.name.toLowerCase() == Constants.PRODUCT_RAM,
+              )?.value,
+              size: x.node.selectedOptions.find(
+                x => x.name.toLowerCase() == Constants.PRODUCT_SIZE,
+              )?.value,
+            });
+          }
         });
-        console.log('allVariants');
-        // console.log();
         var currentSelectedVariant;
         if (props.routeParams?.VariantId) {
-          console.log('asdfffffffasdfasdfas');
           currentSelectedVariant = allVariants.find(
-            x =>
-              x.id ==
-              'Z2lkOi8vc2hvcGlmeS9Qcm9kdWN0VmFyaWFudC80MDMzNTQ1NDI0MDkyNA==',
+            x => x.id == props.routeParams?.VariantId,
           );
         } else {
-          console.log('111asdfffffffasdfasdfas');
           currentSelectedVariant = allVariants[0];
-          // await setSelectedVariant(allVariants[0]);
         }
         setSelectedVariant(currentSelectedVariant);
-        // const allAvailableOptions = [
-        //   {
-        //     title: 'SIZE',
-        //     availableOptions: availableOption,
-        //   },
-        //   {
-        //     title: 'COLOR',
-        //     availableOptions: availableOption,
-        //   },
-        //   {
-        //     title: 'GRADE',
-        //     availableOptions: availableOption,
-        //   },
-        // ];
-
-        console.log('allVariants[0].selectedOption');
-        const gradeAvailableOptions = [];
-
-        // console.log(allVariants);
-        // console.dir(allVariants);
-        // console.log(JSON.stringify(allVariants, null, 4));
-        // var allAvailableVariants = allVariants
-        //   .map(o => {
-        //     // console.log(o);
-        //     // console.log('o');
-        //     return o.selectedOption.map(a => {
-        //       return {
-        //         id: o.id,
-        //         ...a,
-        //       };
-        //     });
-        //   })
-        //   .flat();
-        // console.log('users');
-        // console.log('allVariants');
-
         setAllAvailableVariants(allVariants);
-        console.log('all');
-        console.log(JSON.stringify(allVariants, null, 4));
-        var size = allVariants.map(s => {
-          return {
-            // id: s.id,
-            isSelected: currentSelectedVariant.size == s.size,
-            value: s.size,
-          };
-        });
-        console.log('size');
-        console.log(size);
-        setSizeOptions(unique(size, 'value'));
-
-        // var sizeIds = size.map(a => a.id);
-        console.log(
-          '//// Filter by selected size and selected color (with values not ID',
-        );
-        console.log(selectedVariant.title);
-        var colors = [...allVariants]
-          .filter(
-            a =>
-              a.size.replace(/\s/g, '').toLowerCase() ==
-              currentSelectedVariant.size.replace(/\s/g, '').toLowerCase(),
-          )
-          .map(s => {
-            return {
-              // id: s.id,
-              isSelected: currentSelectedVariant.color == s.color,
-              value: s.color,
-            };
-          });
-        setColorOptions(unique(colors, 'value'));
-        console.log(colors);
-        var grade = [...allVariants]
-          .filter(
-            a =>
-              a.size.replace(/\s/g, '').toLowerCase() ==
-                currentSelectedVariant.size.replace(/\s/g, '').toLowerCase() &&
-              a.color.replace(/\s/g, '').toLowerCase() ==
-                currentSelectedVariant.color.replace(/\s/g, '').toLowerCase(),
-          )
-          .map(s => {
-            return {
-              // id: s.id,
-              isSelected: currentSelectedVariant.grade == s.grade,
-              value: s.grade,
-            };
-          });
-        setGradeOptions(unique(grade, 'value'));
-        // allVariants.forEach(x => {
-        //   // var arr = groupBy(x.selectedOption, 'name');
-        //   // const groupByBrand = groupBy('value', x.selectedOption);
-        //   // console.log("groupByBrand");
-        //   console.log('x.selectedOption');
-        //   console.log(x.selectedOption.length);
-        //   // x.selectedOption.forEach(a => {
-        //   //   console.log('currentValue');
-        //   var size = x.selectedOption.map(siz => {
-        //     if (siz.name.toLowerCase() == 'size') {
-        //       return {
-        //         isSelected: false,
-        //         title: siz.value,
-        //       };
-        //     }
-        //   });
-        //   console.log('size');
-        //   console.log(size);
-        //   //   // console.log(groupByBrand);
-        //   // });
-        //   // console.log('arr');
-        //   // console.log(arr);
-        //   // var flattened = [].concat.apply([], x.selectedOption);
-        //   // // var currentSelectedOption = x.selectedOption.map(a => {
-        //   // //   if (a.name.toLowerCase() == 'size') {
-        //   // //     return a.value;
-        //   // //   }
-        //   // // });
-        //   // console.log('currentSelectedOption');
-        //   // console.log(flattened);
-        // });
-        // console.log(data.product.variants.edges[1].node);
         setIsProductFetched(true);
-        // console.log('productError');
       }
-
-      // console.log(error);
     }
   }, [loading]);
 
-  // useEffect(async () => {
-  //   var input = {
-  //     input: 'Z2lkOi8vc2hvcGlmeS9Qcm9kdWN0LzY4MTUwOTcxOTI2MDQ=',
-  //   };
-  //   getProductByQuery({
-  //     context: GraphqlAdminApi,
-  //     variables: input,
-  //   });
-  //   // if (!loading && data != null) {
-  //   //   console.log('datas');
-  //   //   console.log(data);
-  //   // }
-  // }, []);
-  // useEffect(async () => {
-  //   // check if the user is logged in
-  //   // if logged in then navigate to home
-  //   // navigation.navigate(NavHome);
-  //   // else to login page
-  //   // navigation.navigate(NavLogin);
-  //   // var product = await ProductService.getProductWithId(productId);
-  //   // console.log(product.images[0].src);
-  //   // setProduct(product);
+  useEffect(() => {
+    if (selectedVariant != null && selectedVariant.ram != null) {
+      try {
+        ///Match to get the number alone in size ignoring "GB".
+        var relatedProductsInp = {
+          input: `title:*${selectedVariant.ram.match(/\d+/g)}*`,
+        };
+        getRelatedProducts({
+          context: GraphqlAdminApi,
+          variables: relatedProductsInp,
+        });
+      } catch (e) {
+        console.log(e);
+      }
+    }
+  }, [selectedVariant]);
 
-  //   setExpandedState({
-  //       SIZE : false,
-  //       COLOR : false,
-  //       GRADE : false
-  //   });
-  //   setRelatedProducts();
-  //   if (Platform.OS === 'android') {
-  //     UIManager.setLayoutAnimationEnabledExperimental(true);
-  // }
-  // }, [productId]);
-  const closeButton = (
-    <Text
-      style={{flex: 6, color: '#ffff'}}
-      onPress={() => {
-        setZoomProductImage(false);
-      }}
-    >
-      X
-    </Text>
-  );
+  useEffect(() => {
+    var productId;
+    if (props.route?.params?.ProductId && props.route?.params?.VariantId) {
+      productId = props.route.params?.ProductId;
+    } else {
+      productId = 'Z2lkOi8vc2hvcGlmeS9Qcm9kdWN0LzY3ODM3OTQ3MDg2Nzg=';
+    }
+    fetchProductQuery({
+      context: GraphqlAdminApi,
+      variables: {
+        input: productId,
+      },
+    });
+  }, []);
+  // const closeButton = (
+  //   <Text
+  //     style={{flex: 6, color: '#ffff'}}
+  //     onPress={() => {
+  //       setZoomProductImage(false);
+  //     }}
+  //   >
+  //     X
+  //   </Text>
+  // );
   const zoomProductImageHandler = () => {
     setZoomProductImage(prev => !prev);
   };
 
-  const changeVariantHandler = (color, size, grade) => {
-    if ((color, size, grade)) {
+  const changeVariantHandler = (ram, size, grade) => {
+    if (ram != '' && grade != '') {
       var currentVariant = availableVariants.find(
-        a => a.color == color && a.size == a.size && a.grade == a.grade,
+        a => a.ram == ram && a.size == size && a.grade == grade,
       );
-      setSelectedVariant(currentVariant);
-      {
+      if (currentVariant) {
+        setSelectedVariant(currentVariant);
       }
     }
   };
-  //   return(
-  //     <ZoomImage uri={product.source}/>
-  //   );
-  // };
+
   return (
     <>
       {isProductFetched && (
         <>
+          <SampleImagesSlider
+            selectedGrade={selectedVariant.grade}
+            closePopup={showsampleImagesHandler}
+            showSampleProducts={showSampleImages}
+          />
           <View style={styles.container}>
             <ScrollView>
               <ProductBlock
                 handler={zoomProductImageHandler}
-                imgUrl={currentProduct.imgUrl.imgSrc}
-                title={
-                  currentProduct.productTitle + ' - ' + selectedVariant.title
-                }
+                imgUrl={selectedVariant?.imgUrl?.imgSrc}
+                title={[
+                  selectedVariant.productTitle,
+                  ' - ',
+                  'Grade ' + selectedVariant.grade,
+                  ' ',
+                  selectedVariant.ram,
+                  '/',
+                  selectedVariant.size,
+                ].join('')}
                 grade={selectedVariant.grade}
                 price={selectedVariant.price}
               />
-              {/* <ImageView
-              images={zoomImages}
-              imageIndex={0}
-              visible={zoomProductImage}
-              onRequestClose={() => setZoomProductImage(false)}
-              // renderFooter={(currentImage) =>   (<View><Text>My footer</Text></View>)}
-          /> */}
-              {/* <Modal
-          animationType="slide"
-          visible={zoomProductImage}
-          onRequestClose={() => {
-            setZoomProductImage(false);
-          }}><ZoomImage uri={product.source}/></Modal> */}
-              {/* <ImageView images={zoomImages} imageIndex={0} visible={zoomProductImage} onRequestClose={() => setZoomProductImage(false)} />; */}
-              <Modal
-                animationType="slide"
-                visible={zoomProductImage}
-                swipeDirection="down"
-                onSwipeComplete={e => {
-                  setZoomProductImage(false);
-                }}
-                onRequestClose={() => {
-                  setZoomProductImage(false);
-                }}
-              >
-                {/*  */}
-                <ImageZoom
-                  cropWidth={Dimensions.get('window').width}
-                  cropHeight={Dimensions.get('window').height}
-                  onSwipeDown={e => {
-                    setZoomProductImage(false);
-                  }}
-                  enableSwipeDown={true}
-                  swipeDownThreshold={100}
-                  pinchToZoom={true}
-                  imageWidth={200}
-                  imageHeight={200}
-                >
-                  {/* <Text onPress={() => setZoomProductImage(false)}>X</Text> */}
-                  <Image
-                    style={{width: 200, height: 200}}
-                    source={{
-                      uri: currentProduct.imgUrl.imgSrc,
-                    }}
-                  />
-                </ImageZoom>
-              </Modal>
+              <ProductImageZoom
+                zoomImageHandler={setZoomProductImage}
+                zoomProductImage={zoomProductImage}
+                ImageUrl={selectedVariant?.imgUrl?.imgSrc}
+              />
               <View>
                 <Text style={styles.SelectAttrText}>Available Options</Text>
               </View>
               <View>
-                <AccordionOptions
-                  title={'SIZE'}
-                  toggleExpand={toggleExpand}
-                  expandedState={expandedState}
-                  availableOptions={allSizes}
-                  changeVariant={changeVariantHandler}
+                <ProductAvailableOptions
+                  allAvailableVariants={availableVariants}
+                  selectedVariant={selectedVariant}
+                  changeVariantHandler={changeVariantHandler}
                 />
-                <AccordionOptions
-                  title={'COLOR'}
-                  toggleExpand={toggleExpand}
-                  expandedState={expandedState}
-                  availableOptions={allColors}
-                  changeVariant={changeVariantHandler}
-                />
-                <AccordionOptions
-                  title={'GRADE'}
-                  toggleExpand={toggleExpand}
-                  expandedState={expandedState}
-                  availableOptions={allGrades}
-                  changeVariant={changeVariantHandler}
-                />
-                {/* {allAttributes.map((attr, ind) => {
-                  return (
-                    <View key={ind + attr.title}>
-                      <TouchableOpacity
-                        style={styles.accordionRow}
-                        onPress={() => toggleExpand(attr.title)}
-                      >
-                        <Text style={styles.accordionTitle}>{attr.title}</Text>
-                        <Icon
-                          name={
-                            expandedState[attr.title]
-                              ? 'keyboard-arrow-up'
-                              : 'keyboard-arrow-down'
-                          }
-                          size={30}
-                          color={'#A9A9A9'}
-                        />
-                      </TouchableOpacity>
-                      <View style={styles.accordionParentHr}>
-                        {expandedState[attr.title] &&
-                          attr.availableOptions.map((opt, i) => {
-                            return (
-                              <View
-                                key={i + opt.title}
-                                style={styles.accordionChild}
-                              >
-                                <View
-                                  style={{
-                                    flexDirection: 'row',
-                                    borderColor: opt.isSelected
-                                      ? '#0000CD'
-                                      : '#fff',
-                                    ...styles.attributesContainer,
-                                    ...styles.boxShadw,
-                                  }}
-                                >
-                                  <Text>{opt.title}</Text>
-                                </View>
-                              </View>
-                            );
-                          })}
-                      </View>
-                    </View>
-                  );
-                })} */}
               </View>
-              <View style={styles.horizontalLine} />
 
               <View style={styles.qtySection}>
                 <View style={styles.qtyTextContainer}>
@@ -630,7 +374,7 @@ const ProductDetail = props => {
                 </View>
                 <View style={styles.InputContainer}>
                   <TouchableOpacity
-                    disabled={qtyValue == 0}
+                    disabled={qtyValue == 1}
                     onPress={decreaseQtyHandler}
                   >
                     <Icon
@@ -651,11 +395,14 @@ const ProductDetail = props => {
                   </TouchableOpacity>
                 </View>
               </View>
+              <Specifications />
               <View style={styles.InformationSection}>
                 <View style={{flex: 5}}>
-                  <Text style={styles.InformationTitle}>
-                    Check the sample images for your reference
-                  </Text>
+                  <TouchableWithoutFeedback onPress={showsampleImagesHandler}>
+                    <Text style={styles.InformationTitle}>
+                      Check the sample images for your reference
+                    </Text>
+                  </TouchableWithoutFeedback>
                   <Text style={styles.InformationContent}>
                     Please note that these images are not the exact replica of
                     this device, they are just a representation of the physical
@@ -663,16 +410,19 @@ const ProductDetail = props => {
                   </Text>
                 </View>
                 <View style={{flex: 1}}>
-                  <Icon
-                    name="arrow-right"
-                    size={20}
-                    color="black"
-                    type="entypo"
-                  />
+                  <TouchableOpacity onPress={showsampleImagesHandler}>
+                    <Icon
+                      name="arrow-right"
+                      size={20}
+                      color="black"
+                      type="entypo"
+                    />
+                  </TouchableOpacity>
                 </View>
               </View>
-              <View></View>
-              <RelatedProducts />
+              {showRelatedProducts && (
+                <RelatedProducts products={relatedProducts} />
+              )}
               <View
                 style={{
                   ...styles.InformationSection,
@@ -720,8 +470,6 @@ const ProductDetail = props => {
 };
 
 const ProductBlock = ({handler, imgUrl, title, grade, price}) => {
-  console.log('imgUrl111134');
-  console.log(imgUrl);
   return (
     <View
       style={{
@@ -734,12 +482,20 @@ const ProductBlock = ({handler, imgUrl, title, grade, price}) => {
     >
       <View style={{flex: 2}}>
         <TouchableOpacity onPress={handler}>
-          <Image
-            style={styles.prod_img}
-            source={{
-              uri: imgUrl,
-            }}
-          />
+          {imgUrl != '' && (
+            <Image
+              style={styles.prod_img}
+              source={{
+                uri: imgUrl,
+              }}
+            />
+          )}
+          {imgUrl == '' && (
+            <Image
+              source={require('app-assets/no-image.jpg')}
+              style={styles.prod_img}
+            />
+          )}
         </TouchableOpacity>
       </View>
       <View style={{flex: 3}}>
@@ -752,7 +508,7 @@ const ProductBlock = ({handler, imgUrl, title, grade, price}) => {
             color: '#42c8b7',
           }}
         >
-          {grade}
+          {'Grade ' + grade}
         </Text>
         <Text style={styles.priceText}>{'₹ ' + price}</Text>
       </View>

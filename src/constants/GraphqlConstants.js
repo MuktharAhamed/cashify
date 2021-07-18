@@ -7,7 +7,7 @@ export const GraphqlStoreFrontApi = {
 
 export const GraphqlAdminApi = {
   headers: {
-    'X-Shopify-Access-Token': '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',
+    'X-Shopify-Access-Token': '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',
   },
-  uri: 'https://dvnikhilraj.myshopify.com/admin/api/2021-07/graphql.json',
+  uri: 'https://nikhilcashify.myshopify.com/admin/api/2021-07/graphql.json',
 };
