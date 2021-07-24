@@ -395,7 +395,10 @@ const ProductDetail = props => {
                   </TouchableOpacity>
                 </View>
               </View>
-              <Specifications />
+              <View>
+              <Text style={styles.SpecsText}>Specifications</Text>
+              <Specifications Specifications = {selectedVariant.specs}/>
+              </View>
               <View style={styles.InformationSection}>
                 <View style={{flex: 5}}>
                   <TouchableWithoutFeedback onPress={showsampleImagesHandler}>

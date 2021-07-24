@@ -7,38 +7,17 @@ import {
   TouchableOpacity,
   Image,
   Text,
-  Dimensions,
   ScrollView,
-  TouchableHighlight,
   TouchableNativeFeedback,
 } from 'react-native';
-import {Button} from 'react-native-paper';
-import {Searchbar} from 'react-native-paper';
-import Catergories from 'app-views/Home/Categories';
-import ByPrice from 'app-views/Home/ByPrice';
-import ByGrade from 'app-views/Home/ByGrade';
-import ByBrand from 'app-views/Home/ByBrand';
-import TodaysDeals from 'app-views/Home/TodaysDeals';
+import {useNavigation} from '@react-navigation/native';
 import styles from 'app-views/ProductListing/style';
-import style from 'app-views/Home/style';
-import {black} from 'react-native-paper/lib/typescript/styles/colors';
+import {gql, useLazyQuery} from '@apollo/client';
+import {GraphqlStoreFrontApi} from 'app-constants/GraphqlConstants';
 import {
-  ApolloClient,
-  InMemoryCache,
-  ApolloProvider,
-  useQuery,
-  gql,
-  HttpLink,
-  createHttpLink,
-  useMutation,
-  useLazyQuery,
-} from '@apollo/client';
-
-import {event} from 'react-native-reanimated';
-import {
-  GraphqlAdminApi,
-  GraphqlStoreFrontApi,
-} from 'app-constants/GraphqlConstants';
+  NavProductDetailPage,
+  NavProductListingPage,
+} from 'app-constants/Navigations';
 
 const query = gql`
   query productsfilter($collectionquery: String!) {
@@ -168,13 +147,9 @@ const ProductListing = props => {
         data.collections.edges.forEach(collection => {
           if (collection.node?.products?.edges?.length > 0) {
             collection.node?.products?.edges.forEach(product => {
-              // console.log("product");
-
-              //  console.log(product);
               var varient = {};
               varient.productid = product.node.id;
               varient.productname = product.node.title;
-              // console.log()
               varient.image =
                 product.node.images.edges.length > 0
                   ? product.node.images.edges[0]?.node.src
@@ -186,33 +161,18 @@ const ProductListing = props => {
                     .includes(ProductConstants.PRODUCT_GRADE)
                 ) {
                   var currentProductVariant = {...varient};
-                  // console.log("productVariant");
                   product.node.variants.edges.forEach(a => {
-                    // if(a.)
                     var currentProdGrade = a.node.selectedOptions.find(
                       x =>
                         x.name.toLowerCase() == ProductConstants.PRODUCT_GRADE,
                     )?.value;
-                    // console.log(currentProdGrade);
-                    // console.log("aasdf234");
-                    // console.log("filters.filter(a=>a.isselected)");
-                    // if(product.node.title== "IPHONE 7")
-                    // {
-                    //   console.log("a.node.selectedOptions");
-                    //   console.log(a.node.selectedOptions);
-                    // }
                     var selectedFilters = filters.filter(
                       a => a.isselected && a.text.includes(currentProdGrade),
                     );
-
-                    // console.log("selectedFilters");
-                    // console.log(selectedFilters);
                     if (
                       props.route.params.text == currentProdGrade ||
                       selectedFilters.length > 0
                     ) {
-                      // console.log("aasdf");
-                      // console.log(a);
                       var currentProductVariant = {...varient};
                       currentProductVariant.grade = currentProdGrade;
                       currentProductVariant.varientid = a.node?.id;
@@ -231,6 +191,7 @@ const ProductListing = props => {
                   });
                   // console.log(product.node.variants);
                 } else {
+                  console.log();
                   var currentProductVariant = {...varient};
                   currentProductVariant.grade =
                     product.node.variants.edges[0].node.selectedOptions.find(
@@ -321,11 +282,18 @@ const ProductListing = props => {
     console.log('hit');
     if (filters.some(a => a.isselected)) {
       // var existingFilters = ["title:\"Grade " + props.route.params.text + "\""]
-      var existingFilters = [`title:\"Grade ${props.route.params.text}"`];
+      // var existingFilters = [`title:\"Grade ${props.route.params.text}"`];
       var selectedQuery = filters
         .filter(a => a.isselected)
         .map(x => `title:\"${x.text}\"`);
-      var filterQuery = [...existingFilters, ...selectedQuery].join(' OR ');
+      // var filterQuery = [...existingFilters, ...selectedQuery].join(' OR ');
+      // var existingFilters = ['title:"Grade ' + props.route.params.text + '"'];
+      // var selectedQuery = filters
+      //   .filter(a => a.isselected)
+      //   .map(x => 'title:"' + x.text + '"');
+      var filterQuery = [...selectedQuery].join(' OR ');
+      // var filterQuery = [...selectedQuery];
+
       console.log('filterQuery');
       console.log(filterQuery);
       try {
@@ -334,6 +302,18 @@ const ProductListing = props => {
           context: GraphqlStoreFrontApi,
           variables: {
             collectionquery: filterQuery,
+          },
+        });
+      } catch (e) {
+        console.log(e);
+      }
+    } else {
+      const input = `title:GRADE ${props.route.params.text}`;
+      try {
+        getProductsByQuery({
+          context: GraphqlStoreFrontApi,
+          variables: {
+            collectionquery: input,
           },
         });
       } catch (e) {
@@ -426,6 +406,9 @@ const ProductListing = props => {
       return newFilters;
     });
   };
+  const renderProductlist = ({item}) => {
+    return <ProductBlock item={item} />;
+  };
 
   return (
     <View style={styles.ProductListingContainer}>
@@ -463,7 +446,7 @@ const ProductListing = props => {
       <FlatList
         data={currentVariant} //allVariants
         keyExtractor={item => item.varientid} //has to be unique
-        renderItem={ProductBlock} //method to render the data in the way you want using styling u need
+        renderItem={renderProductlist} //method to render the data in the way you want using styling u need
         horizontal={false}
         numColumns={2}
         contentContainerStyle={{paddingBottom: 30}}
@@ -474,6 +457,7 @@ const ProductListing = props => {
 
 const Filter = ({event, text, isselected}) => {
   // console.log('fiter', event, text, isselected);
+  const [filters, updateFilters] = useState();
   return (
     <TouchableNativeFeedback
       onPress={() => {
@@ -500,23 +484,21 @@ const Filter = ({event, text, isselected}) => {
 };
 
 const ProductBlock = ({item, index}) => {
-  // console.log('text');
-  // console.log(item.text);
+  // const [filters, updateFilters] = useState();
+  // console.log('ProductBlock', item);
+  const navigation = useNavigation();
+  // const [sa, setsa] = useState();
   return (
     <View style={styles.productsContainer}>
-      <View
-        style={{
-          flex: 1,
-          flexDirection: 'row',
-          marginVertical: 10,
-        }}
+      <TouchableOpacity
+        activeOpacity={0.9}
+        onPress={() => navigation.navigate(NavProductDetailPage)}
       >
         <View
           style={{
-            flex: 5,
-            marginLeft: 5,
-            alignItems: 'center',
-            justifyContent: 'center',
+            flex: 1,
+            flexDirection: 'row',
+            marginVertical: 10,
           }}
         >
           <TouchableOpacity>
@@ -534,40 +516,92 @@ const ProductBlock = ({item, index}) => {
         <View style={{flex: 1, paddingHorizontal: 5}}>
           <Icon name={'favorite-border'} size={30} color={'#D3D3D3'} />
         </View>
-      </View>
-      <View
-        style={{
-          marginLeft: 5,
-          marginTop: 5,
-          flex: 1,
-        }}
-      >
-        <View>
-          <Text style={{...styles.productsTitle, height: 45}}>
-            {item.productname + ' ' + item.varientname}
-          </Text>
-          <Text style={styles.gradeText}>{`GRADE ` + item.grade}</Text>
-          <Text style={[{...styles.productsTitle, color: '#F08080'}]}>
-            {item.price}
-          </Text>
-        </View>
-        <View style={{marginVertical: 15}}>
-          <TouchableOpacity
+        {/* </View> */}
+        <View
+          style={{
+            marginLeft: 5,
+            marginTop: 5,
+            flex: 1,
+          }}
+        >
+          <View>
+            <Text style={{...styles.productsTitle, height: 45}}>
+              {item.productname + ' ' + item.varientname}
+            </Text>
+            <Text style={styles.gradeText}>{`GRADE ` + item.grade}</Text>
+            <Text style={[{...styles.productsTitle, color: '#F08080'}]}>
+              {item.price}
+            </Text>
+          </View>
+          <View style={{marginVertical: 15}}>
+            {/* <TouchableOpacity
             underlay
             style={{
+              flex: 5,
+              marginLeft: 5,
               alignItems: 'center',
               justifyContent: 'center',
-              marginBottom: 5,
             }}
-            onPress={() => {
-              addToCart;
-            }}
-          >
-            <Text color="#1877F2" style={styles.addToCartButton}>
-              Add to Cart
-            </Text>
-          </TouchableOpacity>
+          > */}
+            <TouchableOpacity>
+              {item.image == '' && (
+                <Image
+                  source={require('app-assets/no-image.jpg')}
+                  style={styles.productsImage}
+                />
+              )}
+              {item.image != '' && (
+                <Image
+                  source={{uri: item.image}}
+                  style={styles.productsImage}
+                />
+              )}
+            </TouchableOpacity>
+          </View>
+          <View style={{flex: 1, paddingHorizontal: 5}}>
+            <Icon
+              onPress={() => console.log('Call')}
+              name={'favorite-border'}
+              size={30}
+              color={'#D3D3D3'}
+              // color={'red'}
+            />
+          </View>
         </View>
+        <View
+          style={{
+            marginLeft: 5,
+            marginTop: 5,
+            flex: 1,
+          }}
+        >
+          <View>
+            <Text style={{...styles.productsTitle, height: 45}}>
+              {item.productname + ' ' + item.varientname}
+            </Text>
+            <Text style={styles.gradeText}>{`GRADE ` + item.grade}</Text>
+            <Text style={[{...styles.productsTitle, color: '#F08080'}]}>
+              {item.price}
+            </Text>
+          </View>
+        </View>
+      </TouchableOpacity>
+      <View style={{marginVertical: 15}}>
+        <TouchableOpacity
+          underlay
+          style={{
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: 5,
+          }}
+          onPress={() => {
+            addToCart;
+          }}
+        >
+          <Text color="#1877F2" style={styles.addToCartButton}>
+            Add to Cart
+          </Text>
+        </TouchableOpacity>
       </View>
     </View>
   );

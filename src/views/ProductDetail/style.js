@@ -29,6 +29,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: 'bold',
   },
+  SpecsText: {
+    marginVertical: 10,
+    marginHorizontal: 12,
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
   prod_img: {
     width: '100%',
     height: 150,
@@ -118,9 +124,11 @@ const styles = StyleSheet.create({
     flex: 3,
     flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: 10,
   },
   SelectQtyText: {
     fontSize: 16,
+    fontWeight: 'bold',
   },
   qtySection: {
     marginTop: 10,
@@ -296,6 +304,28 @@ const styles = StyleSheet.create({
     borderRadius: 3,
     flex: 1,
     flexDirection: 'row',
+    marginBottom: 10,
+  },
+  specificationmainview: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    flexWrap: 'wrap',
+  },
+  specificationview: {
+    marginHorizontal: 12,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: {width: 1, height: 1},
+    shadowOpacity: 0.4,
+    shadowRadius: 3,
+    elevation: 5,
+    backgroundColor: '#fff',
+    width: '50%',
+    padding: 12,
+    marginBottom: 10,
+    borderRadius: 3,
+    width: 170,
   },
 });
 export default styles;
