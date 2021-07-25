@@ -10,6 +10,7 @@ import {
   TextInput,
   ScrollView,
   TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
 import {gql, useMutation, useLazyQuery} from '@apollo/client';
 import {
