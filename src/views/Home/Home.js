@@ -1,8 +1,6 @@
-
 import store from '../../store/index';
 import {setCustomer} from '../../action/index';
 import {gql, useMutation, useLazyQuery, useQuery} from '@apollo/client';
-
 import {
   NavCartPage,
   NavProductDetailPage,
@@ -19,9 +17,10 @@ import {
   Image,
   Text,
   Dimensions,
+  ToastAndroid,
 } from 'react-native';
 import {Button} from 'react-native-paper';
-import {Searchbar} from 'react-native-paper';
+import {Searchbar, Snackbar} from 'react-native-paper';
 import Catergories from 'app-views/Home/Categories';
 import ByPrice from 'app-views/Home/ByPrice';
 import ByGrade from 'app-views/Home/ByGrade';
@@ -33,6 +32,7 @@ import {useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
 // import {useMutation} from '@apollo/client';
 import {GraphqlStoreFrontApi} from 'app-constants/GraphqlConstants';
+import toast from 'app-views/common/Toast';
 
 const Home = props => {
   const resetAccessToken = gql`
@@ -103,6 +103,7 @@ const Home = props => {
       }
     }
   }, []);
+
   return (
     <ScrollView
       style={style.scrollview}
@@ -141,9 +142,19 @@ const Home = props => {
       <ByGrade />
       <ByBrand />
       <TodaysDeals />
-
-      {/* <Button onPress={() => navigation.navigate(NavSplashScreen)}>dsf</Button> */}
-
+      <Button
+        onPress={() =>
+          toast({
+            text: 'welcome',
+            // duration: ToastAndroid.SHORT,
+            // position: ToastAndroid.TOP,
+            xaxis: -100,
+            // yaxis: 200,
+          })
+        }
+      >
+        toast
+      </Button>
       <Button onPress={() => navigation.navigate(NavProductListingPage)}>
         Product listing page
       </Button>

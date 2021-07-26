@@ -1,8 +1,8 @@
 export const GraphqlStoreFrontApi = {
   headers: {
-    'X-Shopify-Storefront-Access-Token': 'd5014d50928aed86a56f733bb8585dce',
+    'X-Shopify-Storefront-Access-Token': '6bd8bc6b0e4dd08d7a0225d9f737ca1f',
   },
-  uri: 'https://nikhilcashify.myshopify.com/api/graphql',
+  uri: 'https://cashifyindia.myshopify.com/api/graphql',
 };
 
 export const GraphqlAdminApi = {

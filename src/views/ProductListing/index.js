@@ -288,9 +288,9 @@ const ProductListing = props => {
         .map(x => `title:\"${x.text}\"`);
       // var filterQuery = [...existingFilters, ...selectedQuery].join(' OR ');
       // var existingFilters = ['title:"Grade ' + props.route.params.text + '"'];
-      // var selectedQuery = filters
-      //   .filter(a => a.isselected)
-      //   .map(x => 'title:"' + x.text + '"');
+      var selectedQuery = filters
+        .filter(a => a.isselected)
+        .map(x => 'title:"' + x.text + '"');
       var filterQuery = [...selectedQuery].join(' OR ');
       // var filterQuery = [...selectedQuery];
 
@@ -501,7 +501,15 @@ const ProductBlock = ({item, index}) => {
             marginVertical: 10,
           }}
         >
-          <TouchableOpacity>
+          {/* <TouchableOpacity> */}
+          <View
+            style={{
+              flex: 5,
+              marginLeft: 5,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
             {item.image == '' && (
               <Image
                 source={require('app-assets/no-image.jpg')}
@@ -511,61 +519,10 @@ const ProductBlock = ({item, index}) => {
             {item.image != '' && (
               <Image source={{uri: item.image}} style={styles.productsImage} />
             )}
-          </TouchableOpacity>
-        </View>
-        <View style={{flex: 1, paddingHorizontal: 5}}>
-          <Icon name={'favorite-border'} size={30} color={'#D3D3D3'} />
-        </View>
-        {/* </View> */}
-        <View
-          style={{
-            marginLeft: 5,
-            marginTop: 5,
-            flex: 1,
-          }}
-        >
-          <View>
-            <Text style={{...styles.productsTitle, height: 45}}>
-              {item.productname + ' ' + item.varientname}
-            </Text>
-            <Text style={styles.gradeText}>{`GRADE ` + item.grade}</Text>
-            <Text style={[{...styles.productsTitle, color: '#F08080'}]}>
-              {item.price}
-            </Text>
-          </View>
-          <View style={{marginVertical: 15}}>
-            {/* <TouchableOpacity
-            underlay
-            style={{
-              flex: 5,
-              marginLeft: 5,
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          > */}
-            <TouchableOpacity>
-              {item.image == '' && (
-                <Image
-                  source={require('app-assets/no-image.jpg')}
-                  style={styles.productsImage}
-                />
-              )}
-              {item.image != '' && (
-                <Image
-                  source={{uri: item.image}}
-                  style={styles.productsImage}
-                />
-              )}
-            </TouchableOpacity>
+            {/* </TouchableOpacity> */}
           </View>
           <View style={{flex: 1, paddingHorizontal: 5}}>
-            <Icon
-              onPress={() => console.log('Call')}
-              name={'favorite-border'}
-              size={30}
-              color={'#D3D3D3'}
-              // color={'red'}
-            />
+            <Icon name={'favorite-border'} size={30} color={'#D3D3D3'} />
           </View>
         </View>
         <View
@@ -607,4 +564,77 @@ const ProductBlock = ({item, index}) => {
   );
 };
 
+// const ProductBlock = ({item, index}) => {
+//   // console.log('text');
+//   // console.log(item.text);
+//   return (
+//     <View style={styles.productsContainer}>
+//       <View
+//         style={{
+//           flex: 1,
+//           flexDirection: 'row',
+//           marginVertical: 10,
+//         }}
+//       >
+//         <View
+//           style={{
+//             flex: 5,
+//             marginLeft: 5,
+//             alignItems: 'center',
+//             justifyContent: 'center',
+//           }}
+//         >
+//           <TouchableOpacity>
+//             {item.image == '' && (
+//               <Image
+//                 source={require('app-assets/no-image.jpg')}
+//                 style={styles.productsImage}
+//               />
+//             )}
+//             {item.image != '' && (
+//               <Image source={{uri: item.image}} style={styles.productsImage} />
+//             )}
+//           </TouchableOpacity>
+//         </View>
+//         <View style={{flex: 1, paddingHorizontal: 5}}>
+//           <Icon name={'favorite-border'} size={30} color={'#D3D3D3'} />
+//         </View>
+//       </View>
+//       <View
+//         style={{
+//           marginLeft: 5,
+//           marginTop: 5,
+//           flex: 1,
+//         }}
+//       >
+//         <View>
+//           <Text style={{...styles.productsTitle, height: 45}}>
+//             {item.productname + ' ' + item.varientname}
+//           </Text>
+//           <Text style={styles.gradeText}>{`GRADE ` + item.grade}</Text>
+//           <Text style={[{...styles.productsTitle, color: '#F08080'}]}>
+//             {item.price}
+//           </Text>
+//         </View>
+//         <View style={{marginVertical: 15}}>
+//           <TouchableOpacity
+//             underlay
+//             style={{
+//               alignItems: 'center',
+//               justifyContent: 'center',
+//               marginBottom: 5,
+//             }}
+//             onPress={() => {
+//               addToCart;
+//             }}
+//           >
+//             <Text color="#1877F2" style={styles.addToCartButton}>
+//               Add to Cart
+//             </Text>
+//           </TouchableOpacity>
+//         </View>
+//       </View>
+//     </View>
+//   );
+// };
 export default ProductListing;

@@ -29,7 +29,6 @@ import style from 'app-views/Home/style';
 // import gql from 'graphql-tag';
 
 const query = gql`
-
   query query {
     shop {
       name
@@ -45,7 +44,6 @@ const query = gql`
             ) {
               namespace
               value
-
             }
           }
         }
@@ -62,7 +60,6 @@ const lists = [
   {source: require('app-assets/brands/samsung.jpg')},
 ];
 const ByBrand = () => {
-
   const {loading, error, data} = useQuery(query, {
     context: GraphqlStoreFrontApi,
   });
@@ -71,8 +68,7 @@ const ByBrand = () => {
   if (error) {
     console.log('error.message', error);
   }
-  console.log('data', data);
-
+  // console.log('data', data);
 
   return (
     <>
