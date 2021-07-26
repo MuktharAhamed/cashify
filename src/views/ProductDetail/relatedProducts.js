@@ -4,21 +4,6 @@ import styles from 'app-views/ProductDetail/style';
 import {NavProductDetailPage} from 'app-constants/Navigations';
 import {useNavigation} from '@react-navigation/native';
 
-const relateProductsList = [
-  {
-    text: 'Realme X 128 GB',
-    grade: 'Grade D',
-    source: require('app-assets/mob/mobile1.jpg'),
-    price: '₹6,110',
-  },
-  {
-    text: 'Redmi Note 9Pro 8 GB/128 GB',
-    grade: 'Grade C',
-    source: require('app-assets/mob/mobile2.png'),
-    price: '₹9,320',
-  },
-];
-
 const RelatedProducts = props => {
   const navigation = useNavigation();
   const navigationHandler = (productId, variantId) => {
@@ -98,25 +83,30 @@ const RelaetedProdctsBlock = ({
             />
           )}
         </View>
-      </TouchableOpacity>
-      <View
-        style={{
-          marginLeft: 5,
-          marginTop: 5,
-          // flex: 2,
-          // flexDirection: 'row',
-        }}
-      >
-        <Text style={styles.gradeText}>{grade}</Text>
-        <Text style={styles.relatedProductsTitle}>{text}</Text>
-        <Text
-          style={[
-            {...styles.relatedProductsTitle, color: '#B22222', marginBottom: 7},
-          ]}
+
+        <View
+          style={{
+            marginLeft: 5,
+            marginTop: 5,
+            // flex: 2,
+            // flexDirection: 'row',
+          }}
         >
-          {price}
-        </Text>
-      </View>
+          <Text style={styles.gradeText}>{grade}</Text>
+          <Text style={styles.relatedProductsTitle}>{text}</Text>
+          <Text
+            style={[
+              {
+                ...styles.relatedProductsTitle,
+                color: '#B22222',
+                marginBottom: 7,
+              },
+            ]}
+          >
+            {price}
+          </Text>
+        </View>
+      </TouchableOpacity>
     </View>
   );
 };

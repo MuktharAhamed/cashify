@@ -12,8 +12,8 @@ let initialState = {
   customerAccessToken: '',
   customerEmail: '',
   customerMobile: '',
-  customerName: '',
-  productWishListId: '',
+  favoriteMetaFieldId: '',
+  favoriteItems: '',
   expiresAt: '',
 };
 
@@ -24,12 +24,27 @@ const customerReducer = (state = initialState, action) => {
 
     case SET_CUSTOMER:
       return {
-        customerId: action.customer.customerId,
-        customerAccessToken: action.customer.customerAccessToken,
-        customerEmail: action.customer.customerEmail,
-        customerMobile: action.customer.customerMobile,
-        productWishListId: action.customer.productWishListId,
-        expiresAt: action.customer.expiresAt,
+        customerId: action.customer.customerId
+          ? action.customer.customerId
+          : state.customerId,
+        customerAccessToken: action.customer.customerAccessToken
+          ? action.customer.customerAccessToken
+          : state.customerAccessToken,
+        customerEmail: action.customer.customerEmail
+          ? action.customer.customerEmail
+          : state.customerEmail,
+        customerMobile: action.customer.customerMobile
+          ? action.customer.customerMobile
+          : state.customerMobile,
+        expiresAt: action.customer.expiresAt
+          ? action.customer.expiresAt
+          : state.expiresAt,
+        favoriteItems: action.customer.favoriteItems
+          ? action.customer.favoriteItems
+          : state.favoriteItems,
+        favoriteMetaFieldId: action.customer.favoriteMetaFieldId
+          ? action.customer.favoriteMetaFieldId
+          : state.favoriteMetaFieldId,
       };
 
     case REMOVE_CUSTOMER:
