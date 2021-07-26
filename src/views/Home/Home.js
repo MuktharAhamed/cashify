@@ -1,14 +1,15 @@
-
 import store from '../../store/index';
 import {setCustomer} from '../../action/index';
-import {gql, useMutation, useLazyQuery, useQuery} from '@apollo/client';
 
+import {gql, useMutation, useLazyQuery, useQuery} from '@apollo/client';
 import {
   NavCartPage,
   NavProductDetailPage,
   NavLogin,
   NavSignup,
   NavProductListingPage,
+  NavHome,
+  NavFavorites,
 } from 'app-constants/Navigations';
 import {connect} from 'react-redux';
 import React, {useEffect} from 'react';
@@ -57,15 +58,12 @@ const Home = props => {
   const [changeAccessToken] = useMutation(resetAccessToken);
 
   useEffect(async () => {
-    // console.log('props.customer.customerAccessToken');
+    console.log('props.customer.customerAccessToken');
     // console.log(props.customer.customerId);
+    console.log(props.customer);
     // console.log(props.customer);
     // console.log(props.customer);
-    // console.log(props.customer);
-    if (
-      props.customer.expiresAt != null &&
-      props.customer.customerAccessToken != null
-    ) {
+    if (props.customer.expiresAt && props.customer.customerAccessToken) {
       var expiresAt = new Date(props.customer.expiresAt);
       var curentDate = new Date();
       const diffTime = Math.abs(expiresAt - curentDate);
@@ -101,6 +99,9 @@ const Home = props => {
           );
         }
       }
+    } else {
+      console.log('abab');
+      navigation.navigate(NavLogin);
     }
   }, []);
   return (
@@ -160,7 +161,9 @@ const Home = props => {
         ProductDetailPage
       </Button>
       <Button onPress={() => navigation.navigate(NavLogin)}>Login</Button>
-      <Button onPress={() => navigation.navigate(NavSignup)}>Signup</Button>
+      <Button onPress={() => navigation.navigate(NavFavorites)}>
+        Favorites
+      </Button>
     </ScrollView>
   );
 };

@@ -44,6 +44,16 @@ const getCustomer = gql`
       edges {
         node {
           id
+          metafields(first: 10) {
+            edges {
+              node {
+                id
+                key
+                namespace
+                value
+              }
+            }
+          }
           email
         }
       }
@@ -155,9 +165,30 @@ const Login = props => {
       if (customerData?.customers?.edges?.length > 0) {
         var userEmail = customerData?.customers?.edges[0]?.node?.email;
         if (userEmail) {
-          // console.log('customerData?.customers?.edges[0]?.node?.id');
-          // console.log(customerData?.customers?.edges[0]?.node?.id);
-          // setUserId();
+          console.log('customerData?.customers?.edges[0]?.node?.id');
+          console.log(
+            customerData?.customers?.edges[0]?.node?.metafields.edges,
+          );
+          var favoriteMetaField =
+            customerData?.customers?.edges[0]?.node?.metafields.edges.length > 0
+              ? customerData?.customers?.edges[0]?.node?.metafields.edges.find(
+                  x =>
+                    x.node.namespace == 'favorite_products' &&
+                    x.node.key == 'Favorites',
+                )
+              : null;
+          console.log('favoriteMetaField?.node?.value');
+          console.log(favoriteMetaField?.node?.value);
+
+          // console.log(favoriteMetaField?.node);
+          // var favItems = favoriteMetaField?.node
+          //   ? favoriteMetaField?.node?.value
+          //   : '';
+          // console.log(favItems);
+          // var favMetaId = favoriteMetaField?.node
+          //   ? favoriteMetaField?.node?.id
+          //   : '';
+          // console.log(favMetaId);
           const userId = customerData?.customers?.edges[0]?.node?.id;
           var accessTokenInput = {
             input: {
@@ -190,14 +221,19 @@ const Login = props => {
                     .accessToken,
                 customerMobile: username,
                 customerId: userId,
+                customerEmail: userEmail,
+                favoriteItems: favoriteMetaField?.node
+                  ? favoriteMetaField?.node?.value
+                  : '',
+                favoriteMetaFieldId: favoriteMetaField?.node
+                  ? favoriteMetaField?.node?.id
+                  : '',
                 expiresAt:
                   accessToken.customerAccessTokenCreate.customerAccessToken
                     .expiresAt,
               }),
             );
-            navigation.navigate(NavHome, {
-              userId: userId,
-            });
+            navigation.navigate(NavHome);
           }
         } else {
           setLoading(false);
@@ -327,13 +363,11 @@ const Login = props => {
               color="#CDCDCD"
               size={25}
             />
-
           </TouchableOpacity>
         </View>
         <TouchableOpacity>
           <Text onPress={navigatToForgotPassword} style={styles.ForgotPassText}>
             Forgot Password?
-
           </Text>
         </TouchableOpacity>
         <View style={styles.errorView}>
