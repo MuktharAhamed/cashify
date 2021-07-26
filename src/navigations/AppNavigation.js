@@ -10,12 +10,14 @@ import {
   NavCartPage,
   NavForgotPassword,
   NavProductListingPage,
+  NavFavorites,
 } from 'app-constants/Navigations';
 import Home from 'app-views/Home/Home';
 import SplashScreen from 'app-views/SplashScreen';
 import ForgotPassword from 'app-views/ForgotPassword';
 import ProductDetail from 'app-views/ProductDetail';
 import ProductListing from 'app-views/ProductListing';
+import Favorites from 'app-views/Favorites';
 
 import {Provider} from 'react-redux';
 //import Cart from 'app-views/Cart';
@@ -110,6 +112,11 @@ const AppNavigation = () => {
                 name={NavCartPage}
                 component={Cart}
                 options={{title: 'My Cart'}}
+              />
+              <Stack.Screen
+                name={NavFavorites}
+                component={Favorites}
+                options={{title: 'My Favorites'}}
               />
             </Stack.Navigator>
           </NavigationContainer>

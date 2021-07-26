@@ -113,12 +113,12 @@ const ProductAvailableOptions = props => {
       setAllSize(filteredSizes);
 
       var grade = [...props.allAvailableVariants]
-        .filter(
-          a =>
-            a.ram.replace(/\s/g, '').toLowerCase() ==
-              value.replace(/\s/g, '').toLowerCase() &&
-            a.size.replace(/\s/g, '').toLowerCase() ==
-              filteredSizes[0].value.replace(/\s/g, '').toLowerCase(),
+        .filter(a =>
+          a.ram?.replace(/\s/g, '').toLowerCase() ==
+            value.replace(/\s/g, '').toLowerCase() && filteredSizes.length > 0
+            ? a.size?.replace(/\s/g, '').toLowerCase() ==
+              filteredSizes[0]?.value?.replace(/\s/g, '').toLowerCase()
+            : true,
         )
         .map((s, index) => {
           return {
