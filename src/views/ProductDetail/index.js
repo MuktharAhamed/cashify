@@ -265,37 +265,42 @@ const ProductDetail = props => {
       if (relatedProdData.productVariants.edges.length > 0) {
         var allRelatedProducts = [];
         relatedProdData.productVariants.edges.forEach(currentProd => {
-          var relatedProd = {};
-          const productIdBytes = utf8.encode(currentProd.node.product.id);
-          relatedProd.productId = base64.encode(productIdBytes);
-          if (relatedProd.productId == selectedVariant.productId) return;
-          if (
-            allRelatedProducts.some(
-              prd => prd.productId == relatedProd.productId,
-            )
-          ) {
-            return;
+          if (!currentProd?.node?.product?.title.includes('bulk')) {
+            if (allRelatedProducts.length == 5) {
+              return;
+            }
+            var relatedProd = {};
+            const productIdBytes = utf8.encode(currentProd.node.product.id);
+            relatedProd.productId = base64.encode(productIdBytes);
+            if (relatedProd.productId == selectedVariant.productId) return;
+            if (
+              allRelatedProducts.some(
+                prd => prd.productId == relatedProd.productId,
+              )
+            ) {
+              return;
+            }
+            const utf8Bytes = utf8.encode(currentProd.node.id);
+            relatedProd.title = currentProd?.node?.product?.title;
+            if (currentProd?.node?.product?.images?.edges?.length > 0) {
+              relatedProd.ImageUrl =
+                currentProd?.node?.product?.images?.edges[0].node.originalSrc;
+            } else {
+              relatedProd.ImageUrl = '';
+            }
+            relatedProd.variantId = base64.encode(utf8Bytes);
+            relatedProd.price = currentProd.node.price;
+            relatedProd.grade = currentProd.node.selectedOptions.find(
+              x => x.name.toLowerCase() == Constants.PRODUCT_GRADE,
+            )?.value;
+            relatedProd.size = currentProd.node.selectedOptions.find(
+              x => x.name.toLowerCase() == Constants.PRODUCT_SIZE,
+            )?.value;
+            relatedProd.ram = currentProd.node.selectedOptions.find(
+              x => x.name.toLowerCase() == Constants.PRODUCT_RAM,
+            )?.value;
+            allRelatedProducts.push(relatedProd);
           }
-          const utf8Bytes = utf8.encode(currentProd.node.id);
-          relatedProd.title = currentProd?.node?.product?.title;
-          if (currentProd?.node?.product?.images?.edges?.length > 0) {
-            relatedProd.ImageUrl =
-              currentProd?.node?.product?.images?.edges[0].node.originalSrc;
-          } else {
-            relatedProd.ImageUrl = '';
-          }
-          relatedProd.variantId = base64.encode(utf8Bytes);
-          relatedProd.price = currentProd.node.price;
-          relatedProd.grade = currentProd.node.selectedOptions.find(
-            x => x.name.toLowerCase() == Constants.PRODUCT_GRADE,
-          )?.value;
-          relatedProd.size = currentProd.node.selectedOptions.find(
-            x => x.name.toLowerCase() == Constants.PRODUCT_SIZE,
-          )?.value;
-          relatedProd.ram = currentProd.node.selectedOptions.find(
-            x => x.name.toLowerCase() == Constants.PRODUCT_RAM,
-          )?.value;
-          allRelatedProducts.push(relatedProd);
         });
         setRelatedProducts(allRelatedProducts);
         setShowRelatedProducts(true);
@@ -351,10 +356,13 @@ const ProductDetail = props => {
             });
           }
         });
+        console.log(allVariants);
+        console.log('props.routeParams?.VariantId');
+        console.log(props.route.params?.VariantId);
         var currentSelectedVariant;
-        if (props.routeParams?.VariantId) {
+        if (props.route.params?.VariantId) {
           currentSelectedVariant = allVariants.find(
-            x => x.id == props.routeParams?.VariantId,
+            x => x.id == props.route.params?.VariantId,
           );
         } else {
           currentSelectedVariant = allVariants[0];
