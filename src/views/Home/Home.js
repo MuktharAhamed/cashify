@@ -10,6 +10,8 @@ import {
   NavProductListingPage,
   NavHome,
   NavFavorites,
+  NavBulkDetail,
+  NavBulkListing,
 } from 'app-constants/Navigations';
 import {connect} from 'react-redux';
 import React, {useEffect} from 'react';
@@ -158,20 +160,14 @@ const Home = props => {
       >
         toast
       </Button>
-      <Button onPress={() => navigation.navigate(NavProductListingPage)}>
-        Product listing page
+      <Button onPress={() => navigation.navigate(NavBulkListing)}>
+        Bulk Product listing page
       </Button>
       <Button onPress={() => navigation.navigate(NavCartPage)}>
         Cart page
       </Button>
-      <Button
-        onPress={() =>
-          navigation.navigate(NavProductDetailPage, {
-            productId: '6815097553052',
-          })
-        }
-      >
-        ProductDetailPage
+      <Button onPress={() => navigation.navigate(NavBulkDetail)}>
+        Bulk Detail Page
       </Button>
       <Button onPress={() => navigation.navigate(NavLogin)}>Login</Button>
       <Button onPress={() => navigation.navigate(NavFavorites)}>

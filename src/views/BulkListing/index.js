@@ -89,8 +89,8 @@ const BulkListing = props => {
         if (bulkCollection && bulkCollection.products?.edges?.length > 0) {
           var currentBulkProducts = [];
           bulkCollection.products?.edges.forEach(product => {
-            // console.log('product');
-            // console.log(product);
+            console.log('product');
+            console.log(product);
             var bulkProduct = {};
             bulkProduct.title = product.node.title;
             bulkProduct.ProductId = product.node.id;
