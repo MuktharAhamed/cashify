@@ -17,8 +17,14 @@ import {
   TouchableOpacity,
   Text,
   TextInput,
+  FlatList,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import {useNavigation} from '@react-navigation/native';
+import styles from 'app-views/Favorites/style';
+import store from '../../store/index';
+import {setCustomer} from '../../action/index';
+import toast from 'app-views/common/Toast';
 
 const getFavoritesQuery = gql`
   query getFavorites($input: [ID!]!) {
@@ -65,18 +71,99 @@ const getCustomer = gql`
   }
 `;
 
+const addproductToFavoritesQuery = gql`
+  mutation updateFavoritesForUser($input: CustomerInput!) {
+    customerUpdate(input: $input) {
+      customer {
+        metafields(first: 10) {
+          edges {
+            node {
+              key
+              value
+            }
+          }
+        }
+      }
+      userErrors {
+        field
+        message
+      }
+    }
+  }
+`;
+
 const Favorites = props => {
   const [isFavoritesFetched, setfavoritesFetched] = useState(false);
   const [allFavorites, setAllFavorites] = useState([]);
   const [fetchCusotomer, {loading, error, data}] = useLazyQuery(getCustomer, {
     fetchPolicy: 'network-only',
   });
+  const [addProductToFavorites] = useMutation(addproductToFavoritesQuery);
   const [
     fetchFavoriteItems,
     {loading: favoritesLoading, error: favoritesError, data: favoritesData},
   ] = useLazyQuery(getFavoritesQuery, {
     fetchPolicy: 'network-only',
   });
+  const addOrRemoveProductFromFavoritesHandler = async variantId => {
+    console.log('hit');
+    console.log(base64.decode(variantId));
+    if (props.customer.favoriteMetaFieldId) {
+      console.log('props.customer.favoriteItems');
+      console.log(props.customer.favoriteItems);
+      var existingFavItems = props.customer.favoriteItems
+        ? props.customer.favoriteItems.split(',')
+        : [];
+
+      if (existingFavItems.includes(variantId)) {
+        existingFavItems =
+          existingFavItems.length > 0
+            ? existingFavItems.filter(a => a != variantId)
+            : [];
+        setAllFavorites(
+          allFavorites.filter(fav => fav.variantId != base64.decode(variantId)),
+        );
+        toast({
+          text: 'Removed from wishlist',
+          xaxis: 50,
+          yaxis: 1500,
+        });
+      }
+      var favIds =
+        existingFavItems.length > 0 ? existingFavItems.join(',') : '';
+      console.log('favIds', favIds);
+      var input = {
+        input: {
+          metafields: {
+            id: props.customer.favoriteMetaFieldId,
+            namespace: 'favorite_products',
+            key: 'Favorites',
+            value: favIds,
+            valueType: 'STRING',
+            // type: 'STRING',
+          },
+          id: props.customer.customerId,
+        },
+      };
+
+      var result = await addProductToFavorites({
+        context: GraphqlAdminApi,
+        variables: input,
+      });
+      console.log('result');
+      // console.log(result?);
+      // console.log(result.data?.customerUpdate?.userErrors);
+      if (result && !result.data?.customerUpdate?.userErrors.length > 0) {
+        console.log(result.data?.customerUpdate?.customer.metafields.edges[0]);
+        console.log();
+        store.dispatch(
+          setCustomer({
+            favoriteItems: favIds,
+          }),
+        );
+      }
+    }
+  };
 
   useEffect(() => {
     // console.log('props.customer.customerAccessToken');
@@ -91,7 +178,7 @@ const Favorites = props => {
         },
       });
     }
-  }, []);
+  }, [props?.customer?.customerId]);
 
   useEffect(() => {
     console.log(error);
@@ -129,6 +216,7 @@ const Favorites = props => {
   useEffect(() => {
     console.log(favoritesError);
     if (!favoritesLoading && favoritesData != null) {
+      console.log('favoritesData');
       console.log(favoritesData);
       if (favoritesData.nodes.length > 0) {
         var allVariants = [];
@@ -165,7 +253,96 @@ const Favorites = props => {
     }
   }, [favoritesLoading, favoritesData]);
 
-  return isFavoritesFetched && <></>;
+  const renderProduct = ({item}) => {
+    console.log('renderProduct', item);
+    return (
+      <ProductBlock
+        item={item}
+        favHandler={addOrRemoveProductFromFavoritesHandler}
+      />
+    );
+  };
+  return (
+    isFavoritesFetched && (
+      <>
+        <FlatList
+          data={allFavorites}
+          keyExtractor={item => item.variantId}
+          renderItem={renderProduct}
+          horizontal={false}
+          numColumns={2}
+          contentContainerStyle={{paddingBottom: 30}}
+        />
+      </>
+    )
+  );
+};
+
+const ProductBlock = ({item, favHandler}) => {
+  const navigation = useNavigation();
+
+  return (
+    <View style={styles.productsContainer}>
+      {/* <TouchableOpacity
+        activeOpacity={0.9}
+        onPress={() => navigation.navigate(NavProductDetailPage)}
+      > */}
+      <View
+        style={{
+          flex: 1,
+          flexDirection: 'row',
+          marginVertical: 10,
+        }}
+      >
+        <View
+          style={{
+            flex: 5,
+            marginLeft: 5,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          {item.imageUrl == '' && (
+            <Image
+              source={require('app-assets/no-image.jpg')}
+              style={styles.productsImage}
+            />
+          )}
+          {item.imageUrl != '' && (
+            <Image source={{uri: item.imageUrl}} style={styles.productsImage} />
+          )}
+        </View>
+        <View style={{flex: 1, paddingHorizontal: 5}}>
+          <Icon
+            onPress={() => {
+              favHandler(base64.encode(item.variantId));
+            }}
+            name={'delete'}
+            size={30}
+            color={'#D3D3D3'}
+          />
+        </View>
+      </View>
+      <View
+        style={{
+          marginLeft: 5,
+          marginTop: 5,
+          flex: 1,
+        }}
+      >
+        <View>
+          <Text style={{...styles.productsTitle, height: 45}}>
+            {item.prodTitle + ' ' + item.variantTitle}
+          </Text>
+          <Text style={styles.gradeText}>{`GRADE ` + item.grade}</Text>
+          <Text style={[{...styles.productsTitle, color: '#F08080'}]}>
+            {item.price}
+          </Text>
+        </View>
+      </View>
+      {/* </TouchableOpacity> */}
+    </View>
+  );
 };
 
 const mapStateToProps = (state, props) => {

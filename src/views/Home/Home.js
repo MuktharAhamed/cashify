@@ -151,7 +151,7 @@ const Home = props => {
             text: 'welcome',
             // duration: ToastAndroid.SHORT,
             // position: ToastAndroid.TOP,
-            xaxis: -100,
+            // xaxis: -100,
             // yaxis: 200,
           })
         }

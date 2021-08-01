@@ -197,8 +197,8 @@ const ProductDetail = props => {
             ? existingFavItems.filter(a => a != variantId)
             : [];
       }
-      // console.log('existingFavItems');
-      // console.log(existingFavItems);
+      console.log('existingFavItems');
+      console.log(existingFavItems);
       // console.log('existingFavItems.length');
       // console.log(
       //   existingFavItems.length > 0 ? existingFavItems.join(',') : 'null',
@@ -393,7 +393,12 @@ const ProductDetail = props => {
 
   useEffect(() => {
     var productId;
+    console.log(
+      'props.route?.params?.ProductId ',
+      props.route?.params?.ProductId,
+    );
     if (props.route?.params?.ProductId && props.route?.params?.VariantId) {
+      console.log('contains product id', props);
       productId = props.route.params?.ProductId;
     } else {
       productId = 'Z2lkOi8vc2hvcGlmeS9Qcm9kdWN0LzY5MDczNDM5Mjk1MDA=';

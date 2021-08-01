@@ -121,8 +121,14 @@ const ProductListing = props => {
     if (!productLoading && props.route.params.text != null) {
       try {
         console.log('propsload');
-        console.log(props.route.params.text);
-        const input = `title:GRADE ${props.route.params.text}`;
+        console.log(props.route.params);
+        let input;
+        if (props.route.params.from == 'Brand') {
+          input = `title:\"${props.route.params.text}\"`;
+          // .map(x => `title:\"${x.text}\"`);
+        } else {
+          input = `title:GRADE ${props.route.params.text}`;
+        }
         console.log(input);
         getProductsByQuery({
           context: GraphqlStoreFrontApi,
@@ -288,9 +294,9 @@ const ProductListing = props => {
         .map(x => `title:\"${x.text}\"`);
       // var filterQuery = [...existingFilters, ...selectedQuery].join(' OR ');
       // var existingFilters = ['title:"Grade ' + props.route.params.text + '"'];
-      var selectedQuery = filters
-        .filter(a => a.isselected)
-        .map(x => 'title:"' + x.text + '"');
+      // var selectedQuery = filters
+      //   .filter(a => a.isselected)
+      //   .map(x => 'title:"' + x.text + '"');
       var filterQuery = [...selectedQuery].join(' OR ');
       // var filterQuery = [...selectedQuery];
 
@@ -308,7 +314,14 @@ const ProductListing = props => {
         console.log(e);
       }
     } else {
-      const input = `title:GRADE ${props.route.params.text}`;
+      let input;
+      if (props.route.params.from == 'Brand') {
+        input = `title:\"${props.route.params.text}\"`;
+      } else {
+        input = `title:GRADE ${props.route.params.text}`;
+      }
+      // const input = `title:GRADE ${props.route.params.text}`;
+      console.log('input', input);
       try {
         getProductsByQuery({
           context: GraphqlStoreFrontApi,
@@ -407,6 +420,9 @@ const ProductListing = props => {
     });
   };
   const renderProductlist = ({item}) => {
+    {
+      console.log('item', item);
+    }
     return <ProductBlock item={item} />;
   };
 
@@ -457,7 +473,7 @@ const ProductListing = props => {
 
 const Filter = ({event, text, isselected}) => {
   // console.log('fiter', event, text, isselected);
-  const [filters, updateFilters] = useState();
+  // const [filters, updateFilters] = useState();
   return (
     <TouchableNativeFeedback
       onPress={() => {
@@ -490,9 +506,15 @@ const ProductBlock = ({item, index}) => {
   // const [sa, setsa] = useState();
   return (
     <View style={styles.productsContainer}>
+      {console.log('item.productId', item.productId)}
       <TouchableOpacity
         activeOpacity={0.9}
-        onPress={() => navigation.navigate(NavProductDetailPage)}
+        onPress={() =>
+          navigation.navigate(NavProductDetailPage, {
+            ProductId: item.productid,
+            VariantId: item.varientid,
+          })
+        }
       >
         <View
           style={{
