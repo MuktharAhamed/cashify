@@ -3,6 +3,10 @@ import base64 from 'base-64';
 import utf8 from 'utf8';
 import {gql, useMutation, useLazyQuery, useQuery} from '@apollo/client';
 import {
+  NavProductDetailPage,
+  NavProductListingPage,
+} from 'app-constants/Navigations';
+import {
   GraphqlAdminApi,
   GraphqlStoreFrontApi,
 } from 'app-constants/GraphqlConstants';
@@ -224,12 +228,16 @@ const Favorites = props => {
           console.log('variant.product');
           console.log(variant);
           var currentProd = {};
-          currentProd.variantId = variant.id;
+          const variantIdBytes = utf8.encode(variant.id);
+          var variantId = base64.encode(variantIdBytes);
+          currentProd.variantId = variantId;
           currentProd.variantTitle = variant.title;
           currentProd.quantity = variant.inventoryQuantity;
           currentProd.price = variant.price;
           currentProd.prodTitle = variant.product?.title;
-          currentProd.ProductId = variant.product?.id;
+          const productIdBytes = utf8.encode(variant.product?.id);
+          var productId = base64.encode(productIdBytes);
+          currentProd.ProductId = productId;
           currentProd.imageUrl =
             variant.product?.images?.edges?.length > 0
               ? variant.product?.images?.edges[0].node?.originalSrc
@@ -280,67 +288,77 @@ const Favorites = props => {
 
 const ProductBlock = ({item, favHandler}) => {
   const navigation = useNavigation();
+  console.log('item');
+  console.log(item);
 
   return (
     <View style={styles.productsContainer}>
-      {/* <TouchableOpacity
+      <TouchableOpacity
         activeOpacity={0.9}
-        onPress={() => navigation.navigate(NavProductDetailPage)}
-      > */}
-      <View
-        style={{
-          flex: 1,
-          flexDirection: 'row',
-          marginVertical: 10,
-        }}
+        onPress={() =>
+          navigation.navigate(NavProductDetailPage, {
+            ProductId: item.ProductId,
+            VariantId: item.variantId,
+          })
+        }
       >
         <View
           style={{
-            flex: 5,
-            marginLeft: 5,
-            alignItems: 'center',
-            justifyContent: 'center',
+            flex: 1,
+            flexDirection: 'row',
+            marginVertical: 10,
           }}
         >
-          {item.imageUrl == '' && (
-            <Image
-              source={require('app-assets/no-image.jpg')}
-              style={styles.productsImage}
-            />
-          )}
-          {item.imageUrl != '' && (
-            <Image source={{uri: item.imageUrl}} style={styles.productsImage} />
-          )}
-        </View>
-        <View style={{flex: 1, paddingHorizontal: 5}}>
-          <Icon
-            onPress={() => {
-              favHandler(base64.encode(item.variantId));
+          <View
+            style={{
+              flex: 5,
+              marginLeft: 5,
+              alignItems: 'center',
+              justifyContent: 'center',
             }}
-            name={'delete'}
-            size={30}
-            color={'#D3D3D3'}
-          />
+          >
+            {item.imageUrl == '' && (
+              <Image
+                source={require('app-assets/no-image.jpg')}
+                style={styles.productsImage}
+              />
+            )}
+            {item.imageUrl != '' && (
+              <Image
+                source={{uri: item.imageUrl}}
+                style={styles.productsImage}
+              />
+            )}
+          </View>
+          <View style={{flex: 1, paddingHorizontal: 5}}>
+            <Icon
+              onPress={() => {
+                favHandler(base64.encode(item.variantId));
+              }}
+              name={'delete'}
+              size={30}
+              color={'#D3D3D3'}
+            />
+          </View>
         </View>
-      </View>
-      <View
-        style={{
-          marginLeft: 5,
-          marginTop: 5,
-          flex: 1,
-        }}
-      >
-        <View>
-          <Text style={{...styles.productsTitle, height: 45}}>
-            {item.prodTitle + ' ' + item.variantTitle}
-          </Text>
-          <Text style={styles.gradeText}>{`GRADE ` + item.grade}</Text>
-          <Text style={[{...styles.productsTitle, color: '#F08080'}]}>
-            {item.price}
-          </Text>
+        <View
+          style={{
+            marginLeft: 5,
+            marginTop: 5,
+            flex: 1,
+          }}
+        >
+          <View>
+            <Text style={{...styles.productsTitle, height: 45}}>
+              {item.prodTitle + ' ' + item.variantTitle}
+            </Text>
+            <Text style={styles.gradeText}>{`GRADE ` + item.grade}</Text>
+            <Text style={[{...styles.productsTitle, color: '#F08080'}]}>
+              {item.price}
+            </Text>
+          </View>
         </View>
-      </View>
-      {/* </TouchableOpacity> */}
+      </TouchableOpacity>
     </View>
   );
 };
