@@ -10,6 +10,8 @@ import {
   NavProductListingPage,
   NavHome,
   NavFavorites,
+  NavBulkDetail,
+  NavBulkListing,
 } from 'app-constants/Navigations';
 import {connect} from 'react-redux';
 import React, {useEffect} from 'react';
@@ -145,6 +147,7 @@ const Home = props => {
       <ByGrade />
       <ByBrand />
       <TodaysDeals />
+      <Button onPress={() => navigation.navigate(NavBulkListing)}></Button>
       <Button
         onPress={() =>
           toast({
