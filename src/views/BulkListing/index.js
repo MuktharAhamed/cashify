@@ -20,6 +20,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import {useNavigation} from '@react-navigation/native';
 import styles from 'app-views/BulkListing/style';
 import {log} from 'react-native-reanimated';
+import {NavBulkDetail} from 'app-constants/Navigations';
 
 ////https://shopify.dev/custom-storefronts/checkout#update-the-checkout
 
@@ -181,13 +182,13 @@ const ProductBlock = ({item}) => {
   const navigation = useNavigation();
   return (
     <View style={styles.productsContainer}>
-      {console.log('item.productId', item.productId)}
+      {console.log('item.productId', item)}
       <TouchableOpacity
         activeOpacity={0.9}
         onPress={() =>
-          navigation.navigate(NavProductDetailPage, {
-            ProductId: item.productid,
-            VariantId: item.varientid,
+          navigation.navigate(NavBulkDetail, {
+            ProductId: item.ProductId,
+            // VariantId: item.varientid,
           })
         }
       >
