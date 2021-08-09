@@ -14,3 +14,13 @@ export const removeCustomer = customer => ({
   type: types.REMOVE_CUSTOMER,
   customer: customer,
 });
+
+export const checkoutData = data => ({
+  type: types.CHECKOUT_DATA,
+  data: data,
+});
+
+export const lineItemData = data => ({
+  type: types.REMOVE_CUSTOMER,
+  data: data,
+});

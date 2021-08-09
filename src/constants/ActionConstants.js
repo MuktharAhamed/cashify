@@ -1,3 +1,6 @@
 export const SET_CUSTOMER = 'SET_CUSTOMER';
 export const GET_CUSTOMER = 'GET_CUSTOMER';
 export const REMOVE_CUSTOMER = 'REMOVE_CUSTOMER';
+
+export const CHECKOUT_DATA = 'CHECKOUT_DATA';
+export const LINE_ITEM_DATA = 'LINE_ITEM_DATA';

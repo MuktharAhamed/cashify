@@ -9,3 +9,8 @@ export const NavFavorites = 'NavFavoritesPage';
 export const NavForgotPassword = 'ForgotPassword';
 export const NavBulkListing = 'BulkListing';
 export const NavBulkDetail = 'BulkDetails';
+export const NavShippingAddress = 'ShippingAddress';
+export const NavCheckoutPage = 'CheckoutPage';
+export const NavNewShippingAddress = 'NewShippingAddress';
+
+
