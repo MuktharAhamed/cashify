@@ -1,14 +1,17 @@
-
 import store from '../../store/index';
 import {setCustomer} from '../../action/index';
-import {gql, useMutation, useLazyQuery, useQuery} from '@apollo/client';
 
+import {gql, useMutation, useLazyQuery, useQuery} from '@apollo/client';
 import {
   NavCartPage,
   NavProductDetailPage,
   NavLogin,
   NavSignup,
   NavProductListingPage,
+  NavHome,
+  NavFavorites,
+  NavBulkDetail,
+  NavBulkListing,
 } from 'app-constants/Navigations';
 import {connect} from 'react-redux';
 import React, {useEffect} from 'react';
@@ -19,9 +22,10 @@ import {
   Image,
   Text,
   Dimensions,
+  ToastAndroid,
 } from 'react-native';
 import {Button} from 'react-native-paper';
-import {Searchbar} from 'react-native-paper';
+import {Searchbar, Snackbar} from 'react-native-paper';
 import Catergories from 'app-views/Home/Categories';
 import ByPrice from 'app-views/Home/ByPrice';
 import ByGrade from 'app-views/Home/ByGrade';
@@ -33,6 +37,7 @@ import {useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
 // import {useMutation} from '@apollo/client';
 import {GraphqlStoreFrontApi} from 'app-constants/GraphqlConstants';
+import toast from 'app-views/common/Toast';
 
 const Home = props => {
   const resetAccessToken = gql`
@@ -57,15 +62,12 @@ const Home = props => {
   const [changeAccessToken] = useMutation(resetAccessToken);
 
   useEffect(async () => {
-    // console.log('props.customer.customerAccessToken');
+    console.log('props.customer.customerAccessToken');
     // console.log(props.customer.customerId);
+    console.log(props.customer);
     // console.log(props.customer);
     // console.log(props.customer);
-    // console.log(props.customer);
-    if (
-      props.customer.expiresAt != null &&
-      props.customer.customerAccessToken != null
-    ) {
+    if (props.customer.expiresAt && props.customer.customerAccessToken) {
       var expiresAt = new Date(props.customer.expiresAt);
       var curentDate = new Date();
       const diffTime = Math.abs(expiresAt - curentDate);
@@ -101,8 +103,12 @@ const Home = props => {
           );
         }
       }
+    } else {
+      console.log('abab');
+      navigation.navigate(NavLogin);
     }
   }, []);
+
   return (
     <ScrollView
       style={style.scrollview}
@@ -141,26 +147,32 @@ const Home = props => {
       <ByGrade />
       <ByBrand />
       <TodaysDeals />
-
-      {/* <Button onPress={() => navigation.navigate(NavSplashScreen)}>dsf</Button> */}
-
-      <Button onPress={() => navigation.navigate(NavProductListingPage)}>
-        Product listing page
+      <Button
+        onPress={() =>
+          toast({
+            text: 'welcome',
+            // duration: ToastAndroid.SHORT,
+            // position: ToastAndroid.TOP,
+            // xaxis: -100,
+            // yaxis: 200,
+          })
+        }
+      >
+        toast
+      </Button>
+      <Button onPress={() => navigation.navigate(NavBulkListing)}>
+        Bulk Product listing page
       </Button>
       <Button onPress={() => navigation.navigate(NavCartPage)}>
         Cart page
       </Button>
-      <Button
-        onPress={() =>
-          navigation.navigate(NavProductDetailPage, {
-            productId: '6815097553052',
-          })
-        }
-      >
-        ProductDetailPage
+      <Button onPress={() => navigation.navigate(NavBulkDetail)}>
+        Bulk Detail Page
       </Button>
       <Button onPress={() => navigation.navigate(NavLogin)}>Login</Button>
-      <Button onPress={() => navigation.navigate(NavSignup)}>Signup</Button>
+      <Button onPress={() => navigation.navigate(NavFavorites)}>
+        Favorites
+      </Button>
     </ScrollView>
   );
 };

@@ -10,13 +10,18 @@ import {
   NavCartPage,
   NavForgotPassword,
   NavProductListingPage,
+  NavFavorites,
+  NavBulkListing,
+  NavBulkDetail,
 } from 'app-constants/Navigations';
 import Home from 'app-views/Home/Home';
 import SplashScreen from 'app-views/SplashScreen';
 import ForgotPassword from 'app-views/ForgotPassword';
 import ProductDetail from 'app-views/ProductDetail';
 import ProductListing from 'app-views/ProductListing';
-
+import Favorites from 'app-views/Favorites';
+import BulkListing from 'app-views/BulkListing';
+import BulkDetails from 'app-views/BulkDetail';
 import {Provider} from 'react-redux';
 //import Cart from 'app-views/Cart';
 
@@ -111,6 +116,13 @@ const AppNavigation = () => {
                 component={Cart}
                 options={{title: 'My Cart'}}
               />
+              <Stack.Screen
+                name={NavFavorites}
+                component={Favorites}
+                options={{title: 'My Favorites'}}
+              />
+              <Stack.Screen name={NavBulkListing} component={BulkListing} />
+              <Stack.Screen name={NavBulkDetail} component={BulkDetails} />
             </Stack.Navigator>
           </NavigationContainer>
         </PersistGate>

@@ -1,5 +1,8 @@
 import * as ProductConstants from 'app-constants/ProductConstants.js';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import store from '../../store/index';
+import {setCustomer} from '../../action/index';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import React, {useEffect, useState} from 'react';
 import {
   FlatList,
@@ -12,13 +15,16 @@ import {
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import styles from 'app-views/ProductListing/style';
-import {gql, useLazyQuery} from '@apollo/client';
-import {GraphqlStoreFrontApi} from 'app-constants/GraphqlConstants';
+import {gql, useLazyQuery, useMutation} from '@apollo/client';
+import {
+  GraphqlStoreFrontApi,
+  GraphqlAdminApi,
+} from 'app-constants/GraphqlConstants';
 import {
   NavProductDetailPage,
   NavProductListingPage,
 } from 'app-constants/Navigations';
-
+import {connect} from 'react-redux';
 const query = gql`
   query productsfilter($collectionquery: String!) {
     collections(query: $collectionquery, first: 10) {
@@ -60,6 +66,27 @@ const query = gql`
   }
 `;
 
+const addproductToFavoritesQuery = gql`
+  mutation updateFavoritesForUser($input: CustomerInput!) {
+    customerUpdate(input: $input) {
+      customer {
+        metafields(first: 10) {
+          edges {
+            node {
+              key
+              value
+            }
+          }
+        }
+      }
+      userErrors {
+        field
+        message
+      }
+    }
+  }
+`;
+
 const ProductListing = props => {
   // console.log('propsnavigation', `title:GRADE ` + props.route.params.text);
   // const [gradetype, setGradetype] = useState(props.route.params.text);
@@ -70,6 +97,9 @@ const ProductListing = props => {
   ] = useLazyQuery(query, {
     fetchPolicy: 'network-only',
   });
+
+  const [addProductToFavorites] = useMutation(addproductToFavoritesQuery);
+
   const defaultFilters = [
     {
       text: 'Grade A',
@@ -109,6 +139,7 @@ const ProductListing = props => {
     },
   ];
 
+  const [favproducts, setFavoriteProducts] = useState([]);
   const [filters, updateFilters] = useState(defaultFilters);
   const [currentVariant, setCurrentVariant] = useState([]);
   // let allVariants = [];
@@ -120,10 +151,20 @@ const ProductListing = props => {
   useEffect(() => {
     if (!productLoading && props.route.params.text != null) {
       try {
-        console.log('propsload');
-        console.log(props.route.params.text);
-        const input = `title:GRADE ${props.route.params.text}`;
-        console.log(input);
+        var existingFavItems = props.customer.favoriteItems
+          ? props.customer.favoriteItems.split(',')
+          : [];
+        setFavoriteProducts(existingFavItems);
+        // console.log('propsload');
+        // console.log(props.route.params);
+        let input;
+        if (props.route.params.from == 'Brand') {
+          input = `title:\"${props.route.params.text}\"`;
+          // .map(x => `title:\"${x.text}\"`);
+        } else {
+          input = `title:GRADE ${props.route.params.text}`;
+        }
+        // console.log(input);
         getProductsByQuery({
           context: GraphqlStoreFrontApi,
           variables: {
@@ -137,17 +178,18 @@ const ProductListing = props => {
   }, []);
 
   useEffect(() => {
-    console.log('productError');
-    console.log(productError);
+    // console.log('productError');
+    // console.log(productError);
     if (!productLoading && !productError && data != undefined) {
       if (data.collections.edges.length > 0) {
         var allVariants = [];
-        console.log('data.collections.edges');
-        console.log(data.collections.edges);
+        // console.log('data.collections.edges');
+        // console.log(data.collections.edges);
         data.collections.edges.forEach(collection => {
           if (collection.node?.products?.edges?.length > 0) {
             collection.node?.products?.edges.forEach(product => {
               var varient = {};
+
               varient.productid = product.node.id;
               varient.productname = product.node.title;
               varient.image =
@@ -185,13 +227,16 @@ const ProductListing = props => {
                           a => a.varientid == currentProductVariant.varientid,
                         )
                       ) {
+                        currentProductVariant.IsInFavorites =
+                          favproducts.indexOf(currentProductVariant.varientid) >
+                          -1;
                         allVariants.push(currentProductVariant);
                       }
                     }
                   });
                   // console.log(product.node.variants);
                 } else {
-                  console.log();
+                  // console.log();
                   var currentProductVariant = {...varient};
                   currentProductVariant.grade =
                     product.node.variants.edges[0].node.selectedOptions.find(
@@ -211,6 +256,8 @@ const ProductListing = props => {
                       a => a.varientid == currentProductVariant.varientid,
                     )
                   ) {
+                    currentProductVariant.IsInFavorites =
+                      favproducts.indexOf(currentProductVariant.varientid) > -1;
                     allVariants.push(currentProductVariant);
                   }
                 }
@@ -279,7 +326,7 @@ const ProductListing = props => {
   // const [rateselected, setRateselected] = useState(false);
 
   useEffect(() => {
-    console.log('hit');
+    // console.log('hit');
     if (filters.some(a => a.isselected)) {
       // var existingFilters = ["title:\"Grade " + props.route.params.text + "\""]
       // var existingFilters = [`title:\"Grade ${props.route.params.text}"`];
@@ -294,8 +341,8 @@ const ProductListing = props => {
       var filterQuery = [...selectedQuery].join(' OR ');
       // var filterQuery = [...selectedQuery];
 
-      console.log('filterQuery');
-      console.log(filterQuery);
+      // console.log('filterQuery');
+      // console.log(filterQuery);
       try {
         // console.log('propsload');
         getProductsByQuery({
@@ -308,7 +355,14 @@ const ProductListing = props => {
         console.log(e);
       }
     } else {
-      const input = `title:GRADE ${props.route.params.text}`;
+      let input;
+      if (props.route.params.from == 'Brand') {
+        input = `title:\"${props.route.params.text}\"`;
+      } else {
+        input = `title:GRADE ${props.route.params.text}`;
+      }
+      // const input = `title:GRADE ${props.route.params.text}`;
+      // console.log('input', input);
       try {
         getProductsByQuery({
           context: GraphqlStoreFrontApi,
@@ -390,6 +444,83 @@ const ProductListing = props => {
   // const handleRateselectedfilter = () => {
   //   setRateselected(!rateselected);
   // };
+  const addOrRemoveProductFromFavoritesHandler = async variantId => {
+    // console.log(props.customer);
+    // setSelectedVariant(prev => {
+    //   return {
+    //     ...prev,
+    //     isProductInFavorites: !prev.isProductInFavorites,
+    //   };
+    // });
+    var allVariants = currentVariant;
+    allVariants.forEach(a => {
+      if (a.id == variantId) {
+        a.IsInFavorites = true;
+      }
+    });
+    setCurrentVariant(allVariants);
+    setFavoriteProducts(prev => [...prev, variantId]);
+    // console.log('hit');
+    // console.log(variantId);
+    if (props.customer.favoriteMetaFieldId) {
+      // console.log('props.customer.favoriteItems');
+      // console.log(props.customer.favoriteItems);
+      var existingFavItems = props.customer.favoriteItems
+        ? props.customer.favoriteItems.split(',')
+        : [];
+
+      if (!existingFavItems.includes(variantId)) {
+        existingFavItems.push(variantId);
+      } else {
+        // console.log('existingFavItems.length888');
+        existingFavItems =
+          existingFavItems.length > 0
+            ? existingFavItems.filter(a => a != variantId)
+            : [];
+      }
+      // console.log('existingFavItems');
+      // console.log(existingFavItems);
+      // console.log('existingFavItems.length');
+      // console.log(
+      //   existingFavItems.length > 0 ? existingFavItems.join(',') : 'null',
+      // );
+      // console.log(props.customer.favoriteMetaFieldId);
+      // console.log();
+      var favIds =
+        existingFavItems.length > 0 ? existingFavItems.join(',') : '';
+      // console.log(favIds);
+      var input = {
+        input: {
+          metafields: {
+            id: props.customer.favoriteMetaFieldId,
+            namespace: 'favorite_products',
+            key: 'Favorites',
+            value: favIds,
+            valueType: 'STRING',
+            // type: 'STRING',
+          },
+          id: props.customer.customerId,
+        },
+      };
+
+      var result = await addProductToFavorites({
+        context: GraphqlAdminApi,
+        variables: input,
+      });
+      // console.log('result');
+      // console.log(result?);
+      console.log(result.data?.customerUpdate?.userErrors);
+      if (result && !result.data?.customerUpdate?.userErrors.length > 0) {
+        // console.log(result.data?.customerUpdate?.customer.metafields.edges[0]);
+        // console.log();
+        store.dispatch(
+          setCustomer({
+            favoriteItems: favIds,
+          }),
+        );
+      }
+    }
+  };
 
   const addSelectedFilter = text => {
     console.log('addSelectedFilter');
@@ -407,7 +538,15 @@ const ProductListing = props => {
     });
   };
   const renderProductlist = ({item}) => {
-    return <ProductBlock item={item} />;
+    {
+      console.log('item', item);
+    }
+    return (
+      <ProductBlock
+        addToFavorites={addOrRemoveProductFromFavoritesHandler}
+        item={item}
+      />
+    );
   };
 
   return (
@@ -457,7 +596,7 @@ const ProductListing = props => {
 
 const Filter = ({event, text, isselected}) => {
   // console.log('fiter', event, text, isselected);
-  const [filters, updateFilters] = useState();
+  // const [filters, updateFilters] = useState();
   return (
     <TouchableNativeFeedback
       onPress={() => {
@@ -490,9 +629,15 @@ const ProductBlock = ({item, index}) => {
   // const [sa, setsa] = useState();
   return (
     <View style={styles.productsContainer}>
+      {console.log('item.productId', item)}
       <TouchableOpacity
         activeOpacity={0.9}
-        onPress={() => navigation.navigate(NavProductDetailPage)}
+        onPress={() =>
+          navigation.navigate(NavProductDetailPage, {
+            ProductId: item.productid,
+            VariantId: item.varientid,
+          })
+        }
       >
         <View
           style={{
@@ -501,7 +646,15 @@ const ProductBlock = ({item, index}) => {
             marginVertical: 10,
           }}
         >
-          <TouchableOpacity>
+          {/* <TouchableOpacity> */}
+          <View
+            style={{
+              flex: 5,
+              marginLeft: 5,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
             {item.image == '' && (
               <Image
                 source={require('app-assets/no-image.jpg')}
@@ -511,60 +664,14 @@ const ProductBlock = ({item, index}) => {
             {item.image != '' && (
               <Image source={{uri: item.image}} style={styles.productsImage} />
             )}
-          </TouchableOpacity>
-        </View>
-        <View style={{flex: 1, paddingHorizontal: 5}}>
-          <Icon name={'favorite-border'} size={30} color={'#D3D3D3'} />
-        </View>
-        {/* </View> */}
-        <View
-          style={{
-            marginLeft: 5,
-            marginTop: 5,
-            flex: 1,
-          }}
-        >
-          <View>
-            <Text style={{...styles.productsTitle, height: 45}}>
-              {item.productname + ' ' + item.varientname}
-            </Text>
-            <Text style={styles.gradeText}>{`GRADE ` + item.grade}</Text>
-            <Text style={[{...styles.productsTitle, color: '#F08080'}]}>
-              {item.price}
-            </Text>
-          </View>
-          <View style={{marginVertical: 15}}>
-            {/* <TouchableOpacity
-            underlay
-            style={{
-              flex: 5,
-              marginLeft: 5,
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          > */}
-            <TouchableOpacity>
-              {item.image == '' && (
-                <Image
-                  source={require('app-assets/no-image.jpg')}
-                  style={styles.productsImage}
-                />
-              )}
-              {item.image != '' && (
-                <Image
-                  source={{uri: item.image}}
-                  style={styles.productsImage}
-                />
-              )}
-            </TouchableOpacity>
+            {/* </TouchableOpacity> */}
           </View>
           <View style={{flex: 1, paddingHorizontal: 5}}>
-            <Icon
-              onPress={() => console.log('Call')}
-              name={'favorite-border'}
+            <MaterialCommunityIcons
+              style={{marginTop: 10}}
+              name={item.IsInFavorites ? 'heart' : 'heart-outline'}
               size={30}
-              color={'#D3D3D3'}
-              // color={'red'}
+              color={item.IsInFavorites ? 'red' : '#A9A9A9'}
             />
           </View>
         </View>
@@ -607,4 +714,86 @@ const ProductBlock = ({item, index}) => {
   );
 };
 
-export default ProductListing;
+// const ProductBlock = ({item, index}) => {
+//   // console.log('text');
+//   // console.log(item.text);
+//   return (
+//     <View style={styles.productsContainer}>
+//       <View
+//         style={{
+//           flex: 1,
+//           flexDirection: 'row',
+//           marginVertical: 10,
+//         }}
+//       >
+//         <View
+//           style={{
+//             flex: 5,
+//             marginLeft: 5,
+//             alignItems: 'center',
+//             justifyContent: 'center',
+//           }}
+//         >
+//           <TouchableOpacity>
+//             {item.image == '' && (
+//               <Image
+//                 source={require('app-assets/no-image.jpg')}
+//                 style={styles.productsImage}
+//               />
+//             )}
+//             {item.image != '' && (
+//               <Image source={{uri: item.image}} style={styles.productsImage} />
+//             )}
+//           </TouchableOpacity>
+//         </View>
+//         <View style={{flex: 1, paddingHorizontal: 5}}>
+//           <Icon name={'favorite-border'} size={30} color={'#D3D3D3'} />
+//         </View>
+//       </View>
+//       <View
+//         style={{
+//           marginLeft: 5,
+//           marginTop: 5,
+//           flex: 1,
+//         }}
+//       >
+//         <View>
+//           <Text style={{...styles.productsTitle, height: 45}}>
+//             {item.productname + ' ' + item.varientname}
+//           </Text>
+//           <Text style={styles.gradeText}>{`GRADE ` + item.grade}</Text>
+//           <Text style={[{...styles.productsTitle, color: '#F08080'}]}>
+//             {item.price}
+//           </Text>
+//         </View>
+//         <View style={{marginVertical: 15}}>
+//           <TouchableOpacity
+//             underlay
+//             style={{
+//               alignItems: 'center',
+//               justifyContent: 'center',
+//               marginBottom: 5,
+//             }}
+//             onPress={() => {
+//               addToCart;
+//             }}
+//           >
+//             <Text color="#1877F2" style={styles.addToCartButton}>
+//               Add to Cart
+//             </Text>
+//           </TouchableOpacity>
+//         </View>
+//       </View>
+//     </View>
+//   );
+// };
+
+const mapStateToProps = (state, props) => {
+  console.log('state');
+  console.log(state);
+  return {
+    customer: state.customer,
+  };
+};
+
+export default connect(mapStateToProps)(ProductListing);

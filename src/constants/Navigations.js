@@ -5,6 +5,7 @@ export const NavProductDetailPage = 'ProductDetailPage';
 export const NavProductListingPage = 'ProductListingPage';
 export const NavCartPage = 'CartPage';
 export const NavSignup = 'Signup';
-
+export const NavFavorites = 'NavFavoritesPage';
 export const NavForgotPassword = 'ForgotPassword';
-
+export const NavBulkListing = 'BulkListing';
+export const NavBulkDetail = 'BulkDetails';

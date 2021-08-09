@@ -23,13 +23,12 @@ import {
   HttpLink,
   createHttpLink,
 } from '@apollo/client';
-
-import {useTheme} from '@react-navigation/native';
+import {NavProductListingPage} from 'app-constants/Navigations';
 import style from 'app-views/Home/style';
+import {useNavigation} from '@react-navigation/native';
 // import gql from 'graphql-tag';
 
 const query = gql`
-
   query query {
     shop {
       name
@@ -45,7 +44,6 @@ const query = gql`
             ) {
               namespace
               value
-
             }
           }
         }
@@ -55,14 +53,14 @@ const query = gql`
 `;
 
 const lists = [
-  {source: require('app-assets/brands/realme.jpg')},
-  {source: require('app-assets/brands/mi.jpg')},
-  {source: require('app-assets/brands/oppo.jpg')},
-  {source: require('app-assets/brands/vivo.jpg')},
-  {source: require('app-assets/brands/samsung.jpg')},
+  {source: require('app-assets/brands/realme.jpg'), text: 'realme'},
+  {source: require('app-assets/brands/mi.jpg'), text: 'mi'},
+  {source: require('app-assets/brands/oppo.jpg'), text: 'oppo'},
+  {source: require('app-assets/brands/vivo.jpg'), text: 'vivo'},
+  {source: require('app-assets/brands/samsung.jpg'), text: 'samsung'},
+  {source: require('app-assets/brands/samsung.jpg'), text: 'apple'},
 ];
 const ByBrand = () => {
-
   const {loading, error, data} = useQuery(query, {
     context: GraphqlStoreFrontApi,
   });
@@ -71,8 +69,7 @@ const ByBrand = () => {
   if (error) {
     console.log('error.message', error);
   }
-  console.log('data', data);
-
+  // console.log('data', data);
 
   return (
     <>
@@ -89,7 +86,7 @@ const ByBrand = () => {
         }}
       >
         {lists.map((e, index) => (
-          <Subelements key={index} source={e.source} />
+          <Subelements key={index} source={e.source} text={e.text} />
         ))}
       </ScrollView>
     </>
@@ -97,9 +94,16 @@ const ByBrand = () => {
 };
 
 const Subelements = ({source, text}) => {
+  const navigation = useNavigation();
+  const navtoProductListing = text => {
+    navigation.navigate(NavProductListingPage, {
+      text,
+      from: 'Brand',
+    });
+  };
   return (
     <View style={[{...style.boxview, width: 80, height: 60}]}>
-      <TouchableOpacity>
+      <TouchableOpacity onPress={() => navtoProductListing(text)}>
         <Image source={source} style={style.bybrandimage} />
       </TouchableOpacity>
     </View>

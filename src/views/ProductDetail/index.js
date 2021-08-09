@@ -1,5 +1,7 @@
 import ProductAvailableOptions from './ProductAvailableOptions';
 import base64 from 'base-64';
+import store from '../../store/index';
+import {setCustomer} from '../../action/index';
 import utf8 from 'utf8';
 import {gql, useMutation, useLazyQuery, useQuery} from '@apollo/client';
 import {GraphqlAdminApi} from 'app-constants/GraphqlConstants';
@@ -7,6 +9,7 @@ import * as Constants from 'app-constants/ProductConstants';
 import React, {useState, useEffect} from 'react';
 import ProductImageZoom from './ProductZoom';
 import SampleImagesSlider from './SampleImagesSlider';
+import {connect} from 'react-redux';
 // import Specifications from './Specifications';
 import {
   Image,
@@ -18,91 +21,105 @@ import {
   TextInput,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {Button} from 'react-native-paper';
 import RelatedProducts from './relatedProducts';
 import styles from 'app-views/ProductDetail/style';
 import Specifications from './Specifications';
 
-const ProductDetail = props => {
-  const zoomImages = [
-    {
-      props: {
-        // Or you can set source directory.
-        source: require('app-assets/mob/mobile1.jpg'),
-      },
-    },
-  ];
+const relatedProductQuery = gql`
+  query getRelatedProducts($input: String!) {
+    productVariants(first: 50, query: $input) {
+      edges {
+        node {
+          id
+          inventoryQuantity
+          title
+          selectedOptions {
+            name
+            value
+          }
+          price
+          product {
+            id
+            images(first: 1) {
+              edges {
+                node {
+                  originalSrc
+                }
+              }
+            }
+            title
+          }
+        }
+      }
+    }
+  }
+`;
 
-  const relatedProductQuery = gql`
-    query getRelatedProducts($input: String!) {
-      productVariants(first: 5, query: $input) {
+const getProductQuery = gql`
+  query getProductQuery($input: ID!) {
+    product(id: $input) {
+      description
+      id
+      title
+      images(first: 1) {
         edges {
           node {
             id
-            inventoryQuantity
+            originalSrc
+          }
+        }
+      }
+      metafields(first: 50) {
+        edges {
+          node {
+            key
+            id
+            value
+          }
+        }
+      }
+      variants(first: 10) {
+        edges {
+          node {
+            id
             title
-            selectedOptions {
-              name
-              value
-            }
             price
-            product {
-              id
-              images(first: 1) {
-                edges {
-                  node {
-                    originalSrc
-                  }
-                }
-              }
-              title
+            inventoryQuantity
+            selectedOptions {
+              value
+              name
             }
           }
         }
       }
     }
-  `;
-  const getProductQuery = gql`
-    query getProductQuery($input: ID!) {
-      product(id: $input) {
-        description
-        id
-        title
-        images(first: 1) {
-          edges {
-            node {
-              id
-              originalSrc
-            }
-          }
-        }
-        metafields(first: 50) {
+  }
+`;
+
+const addproductToFavoritesQuery = gql`
+  mutation updateFavoritesForUser($input: CustomerInput!) {
+    customerUpdate(input: $input) {
+      customer {
+        metafields(first: 10) {
           edges {
             node {
               key
-              id
               value
             }
           }
         }
-        variants(first: 10) {
-          edges {
-            node {
-              id
-              title
-              price
-              inventoryQuantity
-              selectedOptions {
-                value
-                name
-              }
-            }
-          }
-        }
+      }
+      userErrors {
+        field
+        message
       }
     }
-  `;
+  }
+`;
 
+const ProductDetail = props => {
   const [fetchProductQuery, {loading, error, data}] = useLazyQuery(
     getProductQuery,
     {
@@ -119,6 +136,9 @@ const ProductDetail = props => {
   ] = useLazyQuery(relatedProductQuery, {
     fetchPolicy: 'network-only',
   });
+
+  const [addProductToFavorites] = useMutation(addproductToFavoritesQuery);
+
   const defaultProd = {
     imgUrl: {
       id: '',
@@ -129,6 +149,7 @@ const ProductDetail = props => {
   };
 
   const [relatedProducts, setRelatedProducts] = useState([{}]);
+  const [iscurrentProdInFav, setCurrentProdFav] = useState(false);
   const [showRelatedProducts, setShowRelatedProducts] = useState(false);
   const [availableVariants, setAllAvailableVariants] = useState([]);
   const [zoomProductImage, setZoomProductImage] = useState(false);
@@ -147,6 +168,77 @@ const ProductDetail = props => {
       qty += 1;
       return qty.toString();
     });
+  };
+
+  const addOrRemoveProductFromFavoritesHandler = async variantId => {
+    // console.log(props.customer);
+    // setSelectedVariant(prev => {
+    //   return {
+    //     ...prev,
+    //     isProductInFavorites: !prev.isProductInFavorites,
+    //   };
+    // });
+    setCurrentProdFav(prev => !prev);
+    console.log('hit');
+    console.log(variantId);
+    if (props.customer.favoriteMetaFieldId) {
+      console.log('props.customer.favoriteItems');
+      console.log(props.customer.favoriteItems);
+      var existingFavItems = props.customer.favoriteItems
+        ? props.customer.favoriteItems.split(',')
+        : [];
+
+      if (!existingFavItems.includes(variantId)) {
+        existingFavItems.push(variantId);
+      } else {
+        console.log('existingFavItems.length888');
+        existingFavItems =
+          existingFavItems.length > 0
+            ? existingFavItems.filter(a => a != variantId)
+            : [];
+      }
+      console.log('existingFavItems');
+      console.log(existingFavItems);
+      // console.log('existingFavItems.length');
+      // console.log(
+      //   existingFavItems.length > 0 ? existingFavItems.join(',') : 'null',
+      // );
+      // console.log(props.customer.favoriteMetaFieldId);
+      // console.log();
+      var favIds =
+        existingFavItems.length > 0 ? existingFavItems.join(',') : '';
+      console.log(favIds);
+      var input = {
+        input: {
+          metafields: {
+            id: props.customer.favoriteMetaFieldId,
+            namespace: 'favorite_products',
+            key: 'Favorites',
+            value: favIds,
+            valueType: 'STRING',
+            // type: 'STRING',
+          },
+          id: props.customer.customerId,
+        },
+      };
+
+      var result = await addProductToFavorites({
+        context: GraphqlAdminApi,
+        variables: input,
+      });
+      console.log('result');
+      // console.log(result?);
+      console.log(result.data?.customerUpdate?.userErrors);
+      if (result && !result.data?.customerUpdate?.userErrors.length > 0) {
+        console.log(result.data?.customerUpdate?.customer.metafields.edges[0]);
+        console.log();
+        store.dispatch(
+          setCustomer({
+            favoriteItems: favIds,
+          }),
+        );
+      }
+    }
   };
 
   const decreaseQtyHandler = () => {
@@ -173,37 +265,42 @@ const ProductDetail = props => {
       if (relatedProdData.productVariants.edges.length > 0) {
         var allRelatedProducts = [];
         relatedProdData.productVariants.edges.forEach(currentProd => {
-          var relatedProd = {};
-          const productIdBytes = utf8.encode(currentProd.node.product.id);
-          relatedProd.productId = base64.encode(productIdBytes);
-          if (relatedProd.productId == selectedVariant.productId) return;
-          if (
-            allRelatedProducts.some(
-              prd => prd.productId == relatedProd.productId,
-            )
-          ) {
-            return;
+          if (!currentProd?.node?.product?.title.includes('bulk')) {
+            if (allRelatedProducts.length == 5) {
+              return;
+            }
+            var relatedProd = {};
+            const productIdBytes = utf8.encode(currentProd.node.product.id);
+            relatedProd.productId = base64.encode(productIdBytes);
+            if (relatedProd.productId == selectedVariant.productId) return;
+            if (
+              allRelatedProducts.some(
+                prd => prd.productId == relatedProd.productId,
+              )
+            ) {
+              return;
+            }
+            const utf8Bytes = utf8.encode(currentProd.node.id);
+            relatedProd.title = currentProd?.node?.product?.title;
+            if (currentProd?.node?.product?.images?.edges?.length > 0) {
+              relatedProd.ImageUrl =
+                currentProd?.node?.product?.images?.edges[0].node.originalSrc;
+            } else {
+              relatedProd.ImageUrl = '';
+            }
+            relatedProd.variantId = base64.encode(utf8Bytes);
+            relatedProd.price = currentProd.node.price;
+            relatedProd.grade = currentProd.node.selectedOptions.find(
+              x => x.name.toLowerCase() == Constants.PRODUCT_GRADE,
+            )?.value;
+            relatedProd.size = currentProd.node.selectedOptions.find(
+              x => x.name.toLowerCase() == Constants.PRODUCT_SIZE,
+            )?.value;
+            relatedProd.ram = currentProd.node.selectedOptions.find(
+              x => x.name.toLowerCase() == Constants.PRODUCT_RAM,
+            )?.value;
+            allRelatedProducts.push(relatedProd);
           }
-          const utf8Bytes = utf8.encode(currentProd.node.id);
-          relatedProd.title = currentProd?.node?.product?.title;
-          if (currentProd?.node?.product?.images?.edges?.length > 0) {
-            relatedProd.ImageUrl =
-              currentProd?.node?.product?.images?.edges[0].node.originalSrc;
-          } else {
-            relatedProd.ImageUrl = '';
-          }
-          relatedProd.variantId = base64.encode(utf8Bytes);
-          relatedProd.price = currentProd.node.price;
-          relatedProd.grade = currentProd.node.selectedOptions.find(
-            x => x.name.toLowerCase() == Constants.PRODUCT_GRADE,
-          )?.value;
-          relatedProd.size = currentProd.node.selectedOptions.find(
-            x => x.name.toLowerCase() == Constants.PRODUCT_SIZE,
-          )?.value;
-          relatedProd.ram = currentProd.node.selectedOptions.find(
-            x => x.name.toLowerCase() == Constants.PRODUCT_RAM,
-          )?.value;
-          allRelatedProducts.push(relatedProd);
         });
         setRelatedProducts(allRelatedProducts);
         setShowRelatedProducts(true);
@@ -226,12 +323,16 @@ const ProductDetail = props => {
         // console.log('data.prod.metafields2');
         console.log(data.product.metafields?.edges);
         // var metafields =
+
         const prodBytes = utf8.encode(data.product.id);
         const prodId = base64.encode(prodBytes);
         const allVariants = [];
         data.product.variants.edges.forEach(x => {
           if (x.node.inventoryQuantity > 0) {
             const utf8Bytes = utf8.encode(x.node.id);
+            const variantId = base64.encode(utf8Bytes);
+            // console.log(base64.encode(utf8Bytes));
+            // console.log('base64.encode(utf8Bytes)');
             allVariants.push({
               productTitle: data.product.title,
               productId: prodId,
@@ -240,7 +341,7 @@ const ProductDetail = props => {
                 data.product.metafields?.edges.length > 0
                   ? data.product.metafields?.edges
                   : null,
-              id: base64.encode(utf8Bytes),
+              id: variantId,
               title: x.node.title.replace('/', ' '),
               price: x.node.price,
               grade: x.node.selectedOptions.find(
@@ -255,14 +356,19 @@ const ProductDetail = props => {
             });
           }
         });
+        console.log(allVariants);
+        console.log('props.routeParams?.VariantId');
+        console.log(props.route.params?.VariantId);
         var currentSelectedVariant;
-        if (props.routeParams?.VariantId) {
+        if (props.route.params?.VariantId) {
           currentSelectedVariant = allVariants.find(
-            x => x.id == props.routeParams?.VariantId,
+            x => x.id == props.route.params?.VariantId,
           );
         } else {
           currentSelectedVariant = allVariants[0];
         }
+        var favoriteList = props.customer.favoriteItems.split(',');
+        setCurrentProdFav(favoriteList.includes(currentSelectedVariant.id));
         setSelectedVariant(currentSelectedVariant);
         setAllAvailableVariants(allVariants);
         setIsProductFetched(true);
@@ -274,6 +380,12 @@ const ProductDetail = props => {
     if (selectedVariant != null && selectedVariant.ram != null) {
       try {
         ///Match to get the number alone in size ignoring "GB".
+        var favItems = props.customer.favoriteItems
+          ? props.customer.favoriteItems.split(',')
+          : [];
+        console.log('asdasdasdas');
+        console.log(favItems);
+        setCurrentProdFav(favItems.includes(selectedVariant.id));
         var relatedProductsInp = {
           input: `title:*${selectedVariant.ram.match(/\d+/g)}*`,
         };
@@ -289,10 +401,15 @@ const ProductDetail = props => {
 
   useEffect(() => {
     var productId;
+    console.log(
+      'props.route?.params?.ProductId ',
+      props.route?.params?.ProductId,
+    );
     if (props.route?.params?.ProductId && props.route?.params?.VariantId) {
+      console.log('contains product id', props);
       productId = props.route.params?.ProductId;
     } else {
-      productId = 'Z2lkOi8vc2hvcGlmeS9Qcm9kdWN0LzY3ODM3OTQ3MDg2Nzg=';
+      productId = 'Z2lkOi8vc2hvcGlmeS9Qcm9kdWN0LzY5MDczNDM5Mjk1MDA=';
     }
     fetchProductQuery({
       context: GraphqlAdminApi,
@@ -338,6 +455,8 @@ const ProductDetail = props => {
           <View style={styles.container}>
             <ScrollView>
               <ProductBlock
+                isProductInFavorites={iscurrentProdInFav}
+                addProductToFavorites={addOrRemoveProductFromFavoritesHandler}
                 handler={zoomProductImageHandler}
                 imgUrl={selectedVariant?.imgUrl?.imgSrc}
                 title={[
@@ -351,6 +470,7 @@ const ProductDetail = props => {
                 ].join('')}
                 grade={selectedVariant.grade}
                 price={selectedVariant.price}
+                id={selectedVariant.id}
               />
               <ProductImageZoom
                 zoomImageHandler={setZoomProductImage}
@@ -396,8 +516,7 @@ const ProductDetail = props => {
                 </View>
               </View>
               <View>
-              <Text style={styles.SpecsText}>Specifications</Text>
-              <Specifications Specifications = {selectedVariant.specs}/>
+                <Specifications Specifications={selectedVariant.specs} />
               </View>
               <View style={styles.InformationSection}>
                 <View style={{flex: 5}}>
@@ -472,7 +591,16 @@ const ProductDetail = props => {
   );
 };
 
-const ProductBlock = ({handler, imgUrl, title, grade, price}) => {
+const ProductBlock = ({
+  isProductInFavorites,
+  addProductToFavorites,
+  handler,
+  imgUrl,
+  title,
+  grade,
+  price,
+  id,
+}) => {
   return (
     <View
       style={{
@@ -516,15 +644,29 @@ const ProductBlock = ({handler, imgUrl, title, grade, price}) => {
         <Text style={styles.priceText}>{'₹ ' + price}</Text>
       </View>
       <View style={{flex: 1}}>
-        <Icon
-          style={{marginTop: 10}}
-          name={'favorite-border'}
-          size={30}
-          color={'#A9A9A9'}
-        />
+        <TouchableOpacity
+          onPress={() => {
+            addProductToFavorites(id);
+          }}
+        >
+          <MaterialCommunityIcons
+            style={{marginTop: 10}}
+            name={isProductInFavorites ? 'heart' : 'heart-outline'}
+            size={30}
+            color={isProductInFavorites ? 'red' : '#A9A9A9'}
+          />
+        </TouchableOpacity>
       </View>
     </View>
   );
 };
 
-export default ProductDetail;
+const mapStateToProps = (state, props) => {
+  console.log('state');
+  console.log(state);
+  return {
+    customer: state.customer,
+  };
+};
+
+export default connect(mapStateToProps)(ProductDetail);
