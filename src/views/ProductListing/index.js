@@ -23,8 +23,6 @@ import {
   GraphqlStoreFrontApi,
 
 } from 'app-constants/GraphqlConstants';
-import { connect } from 'react-redux';
-import store from '../../store';
 import { Button } from 'react-native-paper';
 import { Searchbar } from 'react-native-paper';
 import Catergories from 'app-views/Home/Categories';
@@ -34,11 +32,6 @@ import ByBrand from 'app-views/Home/ByBrand';
 import TodaysDeals from 'app-views/Home/TodaysDeals';
 
 import styles from 'app-views/ProductListing/style';
-
-import {
-  GraphqlStoreFrontApi,
-  GraphqlAdminApi,
-} from 'app-constants/GraphqlConstants';
 
 import { gql, useLazyQuery,useMutation } from '@apollo/client';
 import { createCheckout,CheckoutLineAdd,checkoutCustomerAssociate } from "../../checkOut";
@@ -805,7 +798,7 @@ const ProductBlock = ({ item, index, createCheckout, lineItemUpdate, checkoutId 
 );
 };
 
-<<<<<<< Updated upstream
+
 // const ProductBlock = ({item, index}) => {
 //   // console.log('text');
 //   // console.log(item.text);
