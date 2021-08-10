@@ -81,8 +81,8 @@ const Home = props => {
           variables: input,
           context: GraphqlStoreFrontApi,
         });
-        console.log('response.data');
-        console.log(response.data);
+        // console.log('response.data');
+        // console.log(response.data);
         if (response.data.customerAccessTokenRenew.userErrors.length > 0) {
           navigation.navigate(NavLogin, {
             isSessionExpired: true,

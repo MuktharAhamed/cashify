@@ -23,10 +23,10 @@ const style = ScaledSheet.create({
     justifyContent: 'center'
   },
   productsContainer: {
-    alignSelf:"center",
-    padding:"8@ms",
-    width:"95%",
-    marginVertical:"10@ms",
+    alignSelf: "center",
+    padding: "8@ms",
+    width: "95%",
+    marginVertical: "10@ms",
     borderColor: "#fff",
     elevation: 2,
     shadowColor: '#000000',
@@ -36,7 +36,7 @@ const style = ScaledSheet.create({
     shadowRadius: 3,
     elevation: 5,
     backgroundColor: '#fff',
-    borderRadius:10
+    borderRadius: 10
   },
   productsImage: {
     width: 90,
@@ -92,14 +92,24 @@ const style = ScaledSheet.create({
   },
   ProductDescription: {
     backgroundColor: "#ffffff",
-    color:"#b4b2b2",
-    fontSize:12
+    color: "#b4b2b2",
+    fontSize: 12
   },
-  columnSingleView:{
+  columnSingleView: {
     flexDirection: 'column'
   },
-  rowSingleView:{
+  rowSingleView: {
     flexDirection: 'column'
+  },
+  viewActivityIndicator: {
+    display: "flex",
+    zIndex: 2,
+
+  },
+  hideActivityIndicator: {
+    display: "none",
+    zIndex: 0,
+    
   }
 });
 export default style;

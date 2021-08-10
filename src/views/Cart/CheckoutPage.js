@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import {
   ScrollView,
   View,
@@ -35,10 +35,9 @@ import {
 import { useTheme } from '@react-navigation/native';
 import style from 'app-views/Cart/style';
 import ToggleIncrementButton from '../../components/ToggleIncrementButton'
+import { useState } from 'react/cjs/react.development';
 import { color } from 'react-native-reanimated';
 import { ShippingAddress } from "./shippingAddress";
-// import gql from 'graphql-tag';
-
 
 const query = gql`
   query query {
@@ -63,67 +62,66 @@ const query = gql`
     }
   }
 `;
-
-
-// const productList = ProductsData?.data?.shop?.products?.edges
-
-
-
-const Cart = (props) => {
+const CheckoutPage = (props) => {
   const { error, loading, data: LastCheckout } = useQuery(lastIncompleteCheckout, {
     context: GraphqlStoreFrontApi,
     variables: { input: props.customer.customerAccessToken }
   })
   const [LineItems, setLineItems] = useState({})
   const navigation = useNavigation();
-  const [updateItem, setupdateItem] = useState([])
-  const [deleteItem, setdeleteItem] = useState([])
 
   useEffect(() => {
     if (!loading && LastCheckout) {
       if (LastCheckout?.data?.customer?.lastIncompleteCheckout)
-        setLineItems(LastCheckout?.data?.customer?.lastIncompleteCheckout.lineItems)
+        setLineItems(LastCheckout?.data?.customer?.lastIncompleteCheckout)
     }
   }, [LastCheckout, loading])
 
   return (
     <>
-
       <View style={{ backgroundColor: "#f8f6f6", flexDirection: "column" }}>
+        <View style={{ backgroundColor: "#f8f6f6", flexDirection: "column" }}>
+          <View style={{ padding: 5 }} >
+            <Text>
+              Price Details
+            </Text>
+          </View>
+          <View style={{ backgroundColor: "#f8f6f6", flexDirection: "column" }}>
+            <View style={{ backgroundColor: "#f8f6f6", flexDirection: "row", justifyContent: "space-between", padding: 5 }}>
+              <Text>price</Text>
+              <Text>amount</Text>
+            </View>
+            <View style={{ backgroundColor: "#f8f6f6", flexDirection: "row", justifyContent: "space-between", padding: 5 }}>
+              <Text>TCS@</Text>
+              <Text>amount</Text>
+            </View>
+          </View>
+          <View style={{ backgroundColor: "#f8f6f6", flexDirection: "row", justifyContent: "space-between", padding: 5 }}>
+            <Text>
+              Amount To Be Paid
+            </Text>
+          </View>
+        </View>
         <FlatList
           data={LineItems}
           keyExtractor={item => item.id} //has to be unique
           renderItem={({ item, index }) =>
             <CartList item={item}
               index={index}
-              CheckoutId={LastCheckout?.data?.customer?.lastIncompleteCheckout.id}
-              lineItemsUpdate={updateItem}
-              lineItemDelete={deleteItem}
-              setupdateItem={(e) => { setupdateItem(e) }}
-              setdeleteItem={(e) => { setdeleteItem(e) }}
-
-            />} //method to render the data in the way you want using styling u need
+            />} //method to render the data  in the way you want using styling u need
           horizontal={false}
           renderEmptyListComponent={<Text>No data</Text>}
-
         />
-        <View style={{ ...style.productsContainer, flexDirection: "row", justifyContent: "space-between", height: 55 }}>
-          <View style={{ flexDirection: "row", }}>
-            <Icon name={'card-giftcard'} size={28} color={'green'} style={{ paddingLeft: 10, alignSelf: "center" }} />
-            <Text style={{ fontSize: 18, paddingLeft: 10, alignSelf: "center" }}>Add Coupen Code</Text>
-          </View>
-          <TouchableOpacity style={{ height: 55, top: 5 }}>
-            <Text style={{ fontSize: 16, paddingRight: 20, alignSelf: "center", color: "green" }}>Apply</Text>
-          </TouchableOpacity>
-        </View>
-
         <View style={styles.StaticFooterContainer}>
           <View style={styles.StaticFooter}>
             <View style={{ flex: 3 }}>
+              {/* <TouchableOpacity underlay style={{flex : 3}}> */}
+              {/* <Button color='#1877F2' style={styles.addToCartButton}>₹8,3200</Button> */}
               <Text style={styles.addToCartButton}>₹8,3200</Text>
             </View>
+            {/* </TouchableOpacity> */}
             <TouchableOpacity style={{ flex: 3 }}>
-              <Button color='#ffff' style={styles.buyButton}>checkout</Button>
+              <Button color='#ffff' style={styles.buyButton}>Pay Now</Button>
             </TouchableOpacity>
           </View>
         </View>
@@ -132,4 +130,4 @@ const Cart = (props) => {
   );
 };
 
-export default Cart;
+export default CheckoutPage;

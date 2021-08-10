@@ -65,11 +65,7 @@ const ByBrand = () => {
     context: GraphqlStoreFrontApi,
   });
 
-  console.log('loading', loading);
-  if (error) {
-    console.log('error.message', error);
-  }
-  // console.log('data', data);
+
 
   return (
     <>

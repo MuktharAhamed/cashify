@@ -63,7 +63,6 @@ const ByGrade = () => {
 };
 
 const Subelements = ({text, color}) => {
-  console.log(color, 'color');
   const navigation = useNavigation();
 
   const navtoProductListing = text => {

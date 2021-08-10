@@ -1,9 +1,10 @@
-import {NavHome, NavForgotPassword, NavSignup} from 'app-constants/Navigations';
+import { NavHome, NavForgotPassword, NavSignup } from 'app-constants/Navigations';
 import store from '../../store/index';
-import {setCustomer} from '../../action/index';
-import React, {useEffect} from 'react';
-import {useState} from 'react';
+import { setCustomer } from '../../action/index';
+import React, { useEffect } from 'react';
+import { useState } from 'react';
 import LinearGradient from 'react-native-linear-gradient';
+// import store from '../../store/index'
 import {
   View,
   Text,
@@ -14,13 +15,13 @@ import {
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Feather from 'react-native-vector-icons/Feather';
 import styles from 'app-views/Login/style';
-import {gql, useMutation, useLazyQuery, useQuery} from '@apollo/client';
+import { gql, useMutation, useLazyQuery, useQuery } from '@apollo/client';
 import {
   GraphqlAdminApi,
   GraphqlStoreFrontApi,
 } from 'app-constants/GraphqlConstants';
 import * as Animatable from 'react-native-animatable';
-import {useNavigation} from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 
 const getAccessToken = gql`
   mutation customerAccessTokenCreate($input: CustomerAccessTokenCreateInput!) {
@@ -86,7 +87,7 @@ const Login = props => {
   //  const [ updateTodo ] = useMutation(customerCreate);
   const [
     getCustomerByQuery,
-    {loading: customerLoading, error: CustomerError, data: customerData},
+    { loading: customerLoading, error: CustomerError, data: customerData },
   ] = useLazyQuery(getCustomer, {
     fetchPolicy: 'network-only',
   });
@@ -133,6 +134,7 @@ const Login = props => {
   // var userName = `phone=${username}`
   const handlelogin = async () => {
     setLoading(true);
+    console.log(store.getState())
     if (username == '' && password == '') {
       setLoading(false);
       setErrormessage('Please enter your username and passwrod');
@@ -159,7 +161,6 @@ const Login = props => {
       }
     }
   };
-
   useEffect(async () => {
     if (!customerLoading && customerData) {
       if (customerData?.customers?.edges?.length > 0) {
@@ -339,7 +340,7 @@ const Login = props => {
             placeholderTextColor="#CDCDCD"
           />
         </View>
-        <Text style={{...styles.text_footer, marginTop: 35}}>Password</Text>
+        <Text style={{ ...styles.text_footer, marginTop: 35 }}>Password</Text>
         <View style={styles.action}>
           <Feather
             style={styles.iconStyle}
@@ -379,7 +380,7 @@ const Login = props => {
               colors={['#5db8fe', '#39cff2']}
               style={styles.signIn}
             >
-              <Text style={{...styles.textSignIn, color: 'white'}}>
+              <Text style={{ ...styles.textSignIn, color: 'white' }}>
                 {loading ? (
                   <ActivityIndicator size="small" color="#ffffff" />
                 ) : (
@@ -400,7 +401,7 @@ const Login = props => {
               marginTop: 15,
             }}
           >
-            <Text style={{...styles.textSignIn, color: '#4dc2f8'}}>
+            <Text style={{ ...styles.textSignIn, color: '#4dc2f8' }}>
               Sign Up
             </Text>
           </TouchableOpacity>

@@ -1,6 +1,6 @@
 import React from 'react';
-import {NavigationContainer} from '@react-navigation/native';
-import {createStackNavigator} from '@react-navigation/stack';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
 import {
   NavHome,
   NavSplashScreen,
@@ -10,9 +10,14 @@ import {
   NavCartPage,
   NavForgotPassword,
   NavProductListingPage,
+
   NavFavorites,
   NavBulkListing,
   NavBulkDetail,
+
+  NavShippingAddress,
+  NavCheckoutPage
+
 } from 'app-constants/Navigations';
 import Home from 'app-views/Home/Home';
 import SplashScreen from 'app-views/SplashScreen';
@@ -22,28 +27,30 @@ import ProductListing from 'app-views/ProductListing';
 import Favorites from 'app-views/Favorites';
 import BulkListing from 'app-views/BulkListing';
 import BulkDetails from 'app-views/BulkDetail';
-import {Provider} from 'react-redux';
+import { Provider } from 'react-redux';
 //import Cart from 'app-views/Cart';
 
 import Cart from 'app-views/Cart/MyCheckList';
+import ShippingAddressUpdate from 'app-views/Cart/shippingAddress';
+// import ShippingAddressUpdate from 'app-views/Cart/shippingAddress';
 
-import {Appbar} from 'react-native-paper';
+import { Appbar } from 'react-native-paper';
 import {
   AppearanceProvider,
   // useColorScheme,
   Appearance,
 } from 'react-native-appearance';
-import {DefaultTheme, DarkTheme} from '@react-navigation/native';
-import {useColorScheme} from 'react-native';
+import { DefaultTheme, DarkTheme } from '@react-navigation/native';
+import { useColorScheme } from 'react-native';
 import Login from 'app-views/Login/Login';
 import Signup from 'app-views/Signup/Signup';
 
-import {PersistGate} from 'redux-persist/integration/react';
+import { PersistGate } from 'redux-persist/integration/react';
 
 // import store
-import store, {persistor} from '../store';
+import store, { persistor } from '../store';
 
-import {useNavigation} from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 
 const Stack = createStackNavigator();
 
@@ -63,6 +70,26 @@ const AppNavigation = () => {
       notification: '#9933FF',
     },
   };
+
+  const getInitialPage = () => {
+    const customerAccessToken = store.getState().customer.customerAccessToken
+    const expiresAt = store.getState().customer.expiresAt
+    var curentDate = new Date();
+    console.log("customerAccessToken", customerAccessToken)
+    if (customerAccessToken) {
+      const diffTime = Math.abs(expiresAt - curentDate);
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      // console.log(diffDays);
+      if (diffDays >= 0)
+        return NavLogin
+      else
+        return NavHome
+    }
+    else
+      return NavLogin
+
+  }
+
   return (
     <AppearanceProvider>
       <Provider store={store}>
@@ -70,7 +97,7 @@ const AppNavigation = () => {
           <NavigationContainer ref={RootNavRef}>
             {/* <Stack.Navigator initialRouteName={NavHome}> */}
             <Stack.Navigator
-              initialRouteName={NavHome}
+              initialRouteName={getInitialPage}
               screenOptions={{
                 header: props => <CustomNavigationBar {...props} />,
               }}
@@ -78,51 +105,64 @@ const AppNavigation = () => {
               <Stack.Screen
                 name={NavHome}
                 component={Home}
-                options={{title: 'Super Sales'}}
+                options={{ title: 'Super Sales' }}
               />
               <Stack.Screen
                 name={NavSplashScreen}
                 component={SplashScreen}
-                options={{title: 'Super Sales'}}
+                options={{ title: 'Super Sales' }}
               />
 
               <Stack.Screen
                 name={NavProductDetailPage}
                 component={ProductDetail}
-                options={{title: 'Super Sales'}}
+                options={{ title: 'Super Sales' }}
               />
               <Stack.Screen
-                options={{headerShown: false}}
+                options={{ headerShown: false }}
                 name={NavLogin}
                 component={Login}
               />
               <Stack.Screen
-                options={{headerShown: false}}
+                options={{ headerShown: false }}
                 name={NavSignup}
                 component={Signup}
               />
               <Stack.Screen
-                options={{headerShown: false}}
+                options={{ headerShown: false }}
                 name={NavForgotPassword}
                 component={ForgotPassword}
               />
               <Stack.Screen
                 name={NavProductListingPage}
                 component={ProductListing}
-                options={{title: 'Super Sales'}}
+                options={{ title: 'Super Sales' }}
               />
               <Stack.Screen
                 name={NavCartPage}
                 component={Cart}
-                options={{title: 'My Cart'}}
+                options={{ title: 'My Cart' }}
               />
               <Stack.Screen
+
                 name={NavFavorites}
                 component={Favorites}
-                options={{title: 'My Favorites'}}
+                options={{ title: 'My Favorites' }}
               />
               <Stack.Screen name={NavBulkListing} component={BulkListing} />
               <Stack.Screen name={NavBulkDetail} component={BulkDetails} />
+
+              <Stack.Screen
+                name={NavShippingAddress}
+                component={ShippingAddressUpdate}
+                options={{ title: 'My Cart' }}
+              />
+              <Stack.Screen
+                name={NavCheckoutPage}
+                component={ShippingAddressUpdate}
+                options={{ title: 'My Cart' }}
+              />
+
             </Stack.Navigator>
           </NavigationContainer>
         </PersistGate>
@@ -131,7 +171,7 @@ const AppNavigation = () => {
   );
 };
 
-function CustomNavigationBar({navigation, previous, scene}) {
+function CustomNavigationBar({ navigation, previous, scene }) {
   const navigate = useNavigation();
   return (
     <Appbar.Header
