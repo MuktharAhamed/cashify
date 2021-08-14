@@ -34,12 +34,34 @@ import TodaysDeals from 'app-views/Home/TodaysDeals';
 import style from 'app-views/Home/style';
 import Slider from 'app-components/Slider/Slider';
 import {useState} from 'react';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, CommonActions} from '@react-navigation/native';
 // import {useMutation} from '@apollo/client';
 import {GraphqlStoreFrontApi} from 'app-constants/GraphqlConstants';
 import toast from 'app-views/common/Toast';
+// import {CommonActions} from '@react-navigation/native';
+import messaging from '@react-native-firebase/messaging';
 
 const Home = props => {
+  useEffect(() => {
+    messaging()
+      .getToken()
+      .then(token => {
+        console.log('Device Token', token);
+      });
+  }, []);
+
+  console.log('home call');
+  const navigation = useNavigation();
+  // navigation.dispatch(state => {
+  //   // Remove the home route from the stack
+  //   const routes = state.routes.filter(r => r.name !== 'Login');
+
+  //   return CommonActions.reset({
+  //     ...state,
+  //     routes,
+  //     index: routes.length - 1,
+  //   });
+  // });
   const resetAccessToken = gql`
     mutation customerAccessTokenRenew($customerAccessToken: String!) {
       customerAccessTokenRenew(customerAccessToken: $customerAccessToken) {
@@ -57,7 +79,6 @@ const Home = props => {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [text, setText] = useState('');
-  const navigation = useNavigation();
   const onChangeSearch = query => setSearchQuery(query);
   const [changeAccessToken] = useMutation(resetAccessToken);
 

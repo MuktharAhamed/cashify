@@ -1,13 +1,13 @@
 export const GraphqlStoreFrontApi = {
   headers: {
-    'X-Shopify-Storefront-Access-Token': '6bd8bc6b0e4dd08d7a0225d9f737ca1f',
+    'X-Shopify-Storefront-Access-Token': '3a433ba49e82d984a91e5167bb28b9a6',
   },
-  uri: 'https://cashifyindia.myshopify.com/api/graphql',
+  uri: 'https://stkhbkore.myshopify.com/api/graphql',
 };
 
 export const GraphqlAdminApi = {
   headers: {
-    'X-Shopify-Access-Token': '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',
+    'X-Shopify-Access-Token': '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',
   },
-  uri: 'https://cashifyindia.myshopify.com/admin/api/2021-07/graphql.json',
+  uri: 'https://stkhbkore.myshopify.com/admin/api/2021-07/graphql.json',
 };
