@@ -5,6 +5,10 @@ import React, {useEffect} from 'react';
 import {useState} from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 import {CommonActions} from '@react-navigation/native';
+import RazorpayCheckout from 'react-native-razorpay';
+import base64 from 'base-64';
+import utf8 from 'utf8';
+// import Razorpay from 'razorpay';
 // import store from '../../store/index'
 import {
   View,
@@ -134,6 +138,61 @@ const Login = props => {
   };
   // var userName = `phone=${username}`
   const handlelogin = async () => {
+    // var MyOrderId = '';
+    // var Authorization =
+    //   'rzp_test_fZcItTROzJiLjq' + ':' + 'H4m8aGSZn2GOFZ0dCdyaojMu';
+    // const productIdBytes = utf8.encode(Authorization);
+    // var productId = base64.encode(productIdBytes);
+    // fetch('https://api.razorpay.com/v1/orders', {
+    //   method: 'post',
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //     Authorization: 'Basic ' + productId,
+    //   },
+    //   body: JSON.stringify({
+    //     amount: 1000000,
+    //     currency: 'INR',
+    //     receipt: 'Receipt no. 1',
+    //     payment_capture: 1,
+    //     notes: {
+    //       notes_key_1: 'Tea, Earl Grey, Hot',
+    //       notes_key_2: 'Tea, Earl Grey… decaf.',
+    //     },
+    //   }),
+    // }).then(res => {
+    //   console.log('res');
+    //   res.json().then(function (data) {
+    //     console.log('request succeeded with JSON response', data);
+    //     MyOrderId = data.id;
+    //     var options = {
+    //       description: 'Credits towards consultation',
+    //       currency: 'INR',
+    //       key: 'rzp_test_fZcItTROzJiLjq',
+    //       amount: '5000',
+    //       name: 'Acme Corp',
+    //       order_id: MyOrderId,
+    //       //Replace this with an order_id created using Orders API.
+    //       prefill: {
+    //         email: 'gaurav.kumar@example.com',
+    //         contact: '9191919191',
+    //         name: 'Gaurav Kumar',
+    //       },
+    //       theme: {color: '#53a20e'},
+    //     };
+    //     RazorpayCheckout.open(options)
+    //       .then(data => {
+    //         // handle success
+    //         alert(`Success: ${data.razorpay_payment_id}`);
+    //       })
+    //       .catch(error => {
+    //         // handle failure
+    //         alert(`Error: ${error.code} | ${error.description}`);
+    //       });
+    //   });
+    // });
+    // console.log('MyOrder');
+    // console.log(MyOrder);
+
     setLoading(true);
     console.log(store.getState());
     if (username == '' && password == '') {
