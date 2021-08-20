@@ -119,22 +119,15 @@ const ProductListingPage = props => {
     {data: CustomerAssociateData, error: CustomerError},
   ] = useMutation(checkoutCustomerAssociate);
   // const [CheckoutId, setCheckoutId] = useState(props.checkout.CheckoutId)
-  useEffect(() => {
-    if (props.checkout.CheckoutId)
-      CustomerAssociate({
-        context: GraphqlStoreFrontApi,
-        variables: {
-          checkoutId: CheckoutId,
-          customerAccessToken: props.customer.customerAccessToken,
-        },
-      });
-  }, [props.checkout.CheckoutId]);
-  if (checkoutData) {
-    if (checkoutData.checkoutCreate?.checkout?.id) props.checkout(checkoutData);
-  }
-  if (lineItemResponse) {
-    props.lineItem(lineItemResponse);
-  }
+
+  // if (checkoutData) {
+  //   console.log('checkoutData');
+  //   console.log(checkoutData);
+  //   if (checkoutData.checkoutCreate?.checkout?.id) props.checkout(checkoutData);
+  // }
+  // if (lineItemResponse) {
+  //   props.lineItem(lineItemResponse);
+  // }
   const [
     getProductsByQuery,
     {loading: productLoading, error: productError, data},
@@ -143,7 +136,9 @@ const ProductListingPage = props => {
   });
 
   const [addProductToFavorites] = useMutation(addproductToFavoritesQuery);
-
+  // const [currentCheckoutId, setCurrentCheckoutId] = useState(
+  //   props.checkout.CheckoutId,
+  // );
   const defaultFilters = [
     {
       text: 'Grade A',
@@ -191,6 +186,22 @@ const ProductListingPage = props => {
   // console.log('pro', data);
   // console.log('loading', loading);
   // console.log('error', error);
+
+  const associateCheckoutWithUser = async (newCheckoutId, checkoutId) => {
+    console.log('associateCheckoutWithUser');
+    console.log(checkoutId);
+    if (checkoutId != newCheckoutId) {
+      var customAssociateResp = await CustomerAssociate({
+        context: GraphqlStoreFrontApi,
+        variables: {
+          checkoutId: newCheckoutId,
+          customerAccessToken: props.customer.customerAccessToken,
+        },
+      });
+      console.log('customAssociateResp');
+      console.log(customAssociateResp);
+    }
+  };
 
   useEffect(() => {
     if (!productLoading && props?.route?.params?.text != null) {
@@ -315,64 +326,6 @@ const ProductListingPage = props => {
       }
     }
   }, [data, productLoading]);
-  {
-    // const selectedfilters = [];
-    // if (gradeaselected) {
-    //   selectedfilters.push('a');
-    // }
-    // if (gradebselected) {
-    //   selectedfilters.push('b');
-    // }
-    // if (appleselected) {
-    //   selectedfilters.push('apple');
-    // }
-    // console.log('selectedfilters', selectedfilters);
-    // if (data !== undefined) {
-    // var products = data.shop.collections.edges[0].node.products.edges;
-    // // console.log(products,"products");
-    // products.forEach(x => {
-    //   x.node.variants.edges.filter(c => {
-    //     varient.productid = x.node.id;
-    //     varient.productname = x.node.title;
-    //     varient.image = x.node.images.edges[0]?.node.src;
-    //     varient.varientid = c.node.id;
-    //     varient.price = c.node.price;
-    //     varient.quantity = c.node.quantityAvailable;
-    //     varient.varientname = c.node.title;
-    //     c.node.selectedOptions.forEach(v => {
-    //       // console.log('x.node.title', x.node.title);
-    //       // console.log('appleselected', appleselected);
-    //       if (
-    //         v.name.toLowerCase() == 'grade' && !selectedfilters.length > 0
-    //           ? v.value.toLowerCase() ==
-    //             props.route.params.text.toLowerCase()
-    //           : // &&
-    //             // selectedfilters.length > 0 &&
-    //             selectedfilters.includes(v.value.toLowerCase())
-    //         // &&
-    //         // appleselected ===true &&
-    //         // x.node.title.toLowerCase().includes('apple')
-    //       ) {
-    //         // console.log('bothgrades', v.value.toLowerCase());
-    //         // console.log('appleselected', appleselected);
-    //         varient['grade'] = v.value;
-    //         allVariants.push(varient);
-    //         varient = {};
-    //       }
-    //     });
-    //   });
-    // });
-    // setCurrentVariant(allVariants);
-    // }
-    //   }
-    // }, [data, productLoading]);
-    // const [gradeaselected, setGradeaselected] = useState(false);
-    // const [gradebselected, setGradebselected] = useState(false);
-    // const [appleselected, setAppleselected] = useState(false);
-    // const [samsungselected, setSamsungselected] = useState(false);
-    // const [redmiselected, setRedmiselected] = useState(false);
-    // const [rateselected, setRateselected] = useState(false);
-  }
 
   useEffect(() => {
     // console.log('hit');
@@ -380,19 +333,7 @@ const ProductListingPage = props => {
       var selectedQuery = filters
         .filter(a => a.isselected)
         .map(x => `title:\"${x.text}\"`);
-      // var existingFilters = ["title:\"Grade " + props.route.params.text + "\""]
-      // var existingFilters = [`title:\"Grade ${props.route.params.text}"`];
-      // var filterQuery = [...existingFilters, ...selectedQuery].join(' OR ');
-      // var existingFilters = ['title:"Grade ' + props.route.params.text + '"'];
-      // var selectedQuery = filters
-      //   .filter(a => a.isselected)
-      //   .map(x => 'title:"' + x.text + '"');
-      // var filterQuery = [...selectedQuery];
-      // console.log('propsload');
       var filterQuery = [...selectedQuery].join(' OR ');
-
-      // console.log('filterQuery');
-      // console.log(filterQuery);
       try {
         getProductsByQuery({
           context: GraphqlStoreFrontApi,
@@ -426,82 +367,7 @@ const ProductListingPage = props => {
     }
   }, [filters]);
 
-  // useEffect(() => {
-  //   if (!productLoading && productError != null) {
-  //     try {
-  //       let selectedfilters;
-  //       if (gradeaselected) {
-  //         selectedfilters = 'title:"GRADE A"';
-  //       }
-  //       if (gradebselected) {
-  //         if (selectedfilters) {
-  //           selectedfilters += ' OR ';
-  //         }
-  //         selectedfilters =
-  //           (selectedfilters ? selectedfilters : '') +
-  //           'title:' +
-  //           (gradebselected ? '"GRADE B"' : '');
-  //       }
-  //       if (appleselected) {
-  //         if (selectedfilters) {
-  //           selectedfilters += ' OR ';
-  //         }
-  //         selectedfilters =
-  //           (selectedfilters ? selectedfilters : '') +
-  //           'title:' +
-  //           (appleselected ? '"APPLE"' : '');
-  //       }
-  //       console.log('selectedfilters', selectedfilters);
-  //       console.log('propsload');
-  //       if (selectedfilters) {
-  //         getProductsByQuery({
-  //           context: GraphqlStoreFrontApi,
-  //           variables: {
-  //             collectionquery: selectedfilters,
-  //             // ? selectedfilters
-  //             // : 'title:GRADE ' + gradetype,
-  //           },
-  //         });
-  //       } else {
-  //         getProductsByQuery({
-  //           context: GraphqlStoreFrontApi,
-  //           variables: {collectionquery: `title:GRADE ` + gradetype},
-  //         });
-  //       }
-  //     } catch (e) {
-  //       console.log(e);
-  //     }
-  //   }
-  // }, [
-  //   productLoading
-  // ]);
-
-  // const handlegradeaselectedfilter = () => {
-  //   setGradeaselected(!gradeaselected);
-  // };
-  // const handlegradebselectedfilter = () => {
-  //   setGradebselected(!gradebselected);
-  // };
-  // const handleAppleselectedfilter = () => {
-  //   setAppleselected(!appleselected);
-  // };
-  // const handleSamsungselectedfilter = () => {
-  //   setSamsungselected(!samsungselected);
-  // };
-  // const handleRedmiselectedfilter = () => {
-  //   setRedmiselected(!redmiselected);
-  // };
-  // const handleRateselectedfilter = () => {
-  //   setRateselected(!rateselected);
-  // };
   const addOrRemoveProductFromFavoritesHandler = async variantId => {
-    // console.log(props.customer);
-    // setSelectedVariant(prev => {
-    //   return {
-    //     ...prev,
-    //     isProductInFavorites: !prev.isProductInFavorites,
-    //   };
-    // });
     var allVariants = currentVariant;
     allVariants.forEach(a => {
       if (a.id == variantId) {
@@ -559,7 +425,7 @@ const ProductListingPage = props => {
       });
       // console.log('result');
       // console.log(result?);
-      console.log(result.data?.customerUpdate?.userErrors);
+      // console.log(result.data?.customerUpdate?.userErrors);
       if (result && !result.data?.customerUpdate?.userErrors.length > 0) {
         // console.log(result.data?.customerUpdate?.customer.metafields.edges[0]);
         // console.log();
@@ -573,7 +439,7 @@ const ProductListingPage = props => {
   };
 
   const addSelectedFilter = text => {
-    console.log('addSelectedFilter');
+    // console.log('addSelectedFilter');
     updateFilters(prev => {
       // const existingFilters = prev;
       // console.log('newFilters');
@@ -586,18 +452,6 @@ const ProductListingPage = props => {
       };
       return newFilters;
     });
-  };
-
-  const renderProductlist = ({item}) => {
-    {
-      console.log('item', item);
-    }
-    return (
-      <ProductBlock
-        addToFavorites={addOrRemoveProductFromFavoritesHandler}
-        item={item}
-      />
-    );
   };
 
   return (
@@ -642,9 +496,8 @@ const ProductListingPage = props => {
             lineItemUpdate={e => {
               LineItemToCart(e);
             }}
-            createCheckout={e => {
-              createCheckoutMut(e);
-            }}
+            associateCheckoutWithUser={associateCheckoutWithUser}
+            createCheckout={createCheckoutMut}
             checkoutId={props.checkout.CheckoutId}
             addToFavorites={addOrRemoveProductFromFavoritesHandler}
           />
@@ -688,29 +541,54 @@ const Filter = ({event, text, isselected}) => {
 const ProductBlock = ({
   item,
   index,
+  associateCheckoutWithUser,
   createCheckout,
   lineItemUpdate,
   checkoutId,
 }) => {
   const navigation = useNavigation();
-  console.log(item);
-  const addToCart = varientid => {
-    // console.log(item.node.variants)
+  // console.log(item);
+  const addToCart = async varientid => {
+    console.log('item.node.variants');
+    console.log(varientid);
+
     console.log(checkoutId);
     if (!checkoutId) {
-      // console.log("here")
-      createCheckout({
+      console.log('here');
+      // console.log(createCheckout);
+      const result = await createCheckout({
         context: GraphqlStoreFrontApi,
         variables: {input: {lineItems: [{quantity: 1, variantId: varientid}]}},
       });
+      if (!result.data.checkoutCreate?.userErrors?.length > 0) {
+        if (result.data.checkoutCreate?.checkout?.id) {
+          console.log('result.checkoutCreate?.checkout?.id');
+          console.log(result.data.checkoutCreate?.checkout?.id);
+          associateCheckoutWithUser(
+            result.data.checkoutCreate?.checkout?.id,
+            checkoutId,
+          );
+          // setCurrentCheckoutId(result.checkoutCreate?.checkout?.id);
+          // props.checkout(result.data.checkoutCreate?.checkout);
+        }
+        console.log('result');
+        console.log(result.data.checkoutCreate?.checkout?.id);
+      } else {
+        console.log('Error');
+        console.log(result.data.checkoutCreate?.userErrors);
+      }
     } else {
-      lineItemUpdate({
+      console.log('here lineItemUpdate');
+      var linetItemResponse = await lineItemUpdate({
         context: GraphqlStoreFrontApi,
         variables: {
           lineItems: [{quantity: 1, variantId: varientid}],
           checkoutId: checkoutId,
         },
       });
+      if (lineItemResponse) {
+        props.lineItem(lineItemResponse);
+      }
     }
 
     // let previousData = [...AddToCartList]
@@ -723,7 +601,6 @@ const ProductBlock = ({
 
   return (
     <View style={styles.productsContainer}>
-      {console.log('item.productId', item)}
       <TouchableOpacity
         activeOpacity={0.9}
         onPress={() =>
