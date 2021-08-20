@@ -97,6 +97,7 @@ const addproductToFavoritesQuery = gql`
 `;
 
 const Favorites = props => {
+  console.log('favorites');
   const [isFavoritesFetched, setfavoritesFetched] = useState(false);
   const [allFavorites, setAllFavorites] = useState([]);
   const [fetchCusotomer, {loading, error, data}] = useLazyQuery(getCustomer, {

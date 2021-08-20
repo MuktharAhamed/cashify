@@ -1,32 +1,37 @@
 import gql from 'graphql-tag';
 
 export const CheckoutLineAdd = gql`
-mutation checkoutLineItemsAdd($lineItems: [CheckoutLineItemInput!]!, $checkoutId: ID!) {
-  checkoutLineItemsAdd(lineItems: $lineItems, checkoutId: $checkoutId) {
-    checkout {
-      id
-    }
-    checkoutUserErrors {
-      code
-      field
-      message
+  mutation checkoutLineItemsAdd(
+    $lineItems: [CheckoutLineItemInput!]!
+    $checkoutId: ID!
+  ) {
+    checkoutLineItemsAdd(lineItems: $lineItems, checkoutId: $checkoutId) {
+      checkout {
+        id
+      }
+      checkoutUserErrors {
+        code
+        field
+        message
+      }
     }
   }
-}`;
+`;
 
-export const CheckoutCreate = gql`mutation checkoutCreate($input: CheckoutCreateInput!) {
-  checkoutCreate(input: $input) {
-    checkout {
-      id
+export const CheckoutCreate = gql`
+  mutation checkoutCreate($input: CheckoutCreateInput!) {
+    checkoutCreate(input: $input) {
+      checkout {
+        id
+      }
+      checkoutUserErrors {
+        code
+        field
+        message
+      }
+      queueToken
     }
-    checkoutUserErrors {
-      code
-      field
-      message
-    }
-    queueToken
   }
-}
 `;
 
 const CheckoutFragment = gql`
@@ -36,7 +41,7 @@ const CheckoutFragment = gql`
     totalTax
     subtotalPrice
     totalPrice
-    lineItems (first: 100) {
+    lineItems(first: 100) {
       edges {
         node {
           id
@@ -50,124 +55,135 @@ const CheckoutFragment = gql`
             price
           }
           quantity
-          ava
         }
       }
     }
   }
 `;
 export const TokenizedPayV3 = gql`
-mutation checkoutCompleteWithTokenizedPaymentV3($checkoutId: ID!, $payment: TokenizedPaymentInputV3!) {
-  checkoutCompleteWithTokenizedPaymentV3(
-    checkoutId: $checkoutId
-    payment: $payment
+  mutation checkoutCompleteWithTokenizedPaymentV3(
+    $checkoutId: ID!
+    $payment: TokenizedPaymentInputV3!
   ) {
-    checkout {
-      id
-    }
-    checkoutUserErrors {
-      code
-      field
-      message
-    }
-    payment {
-      id
+    checkoutCompleteWithTokenizedPaymentV3(
+      checkoutId: $checkoutId
+      payment: $payment
+    ) {
+      checkout {
+        id
+      }
+      checkoutUserErrors {
+        code
+        field
+        message
+      }
+      payment {
+        id
+      }
     }
   }
-}`
+`;
 export const ShippingAddressUpdate = gql`
-mutation checkoutShippingAddressUpdateV2($shippingAddress: MailingAddressInput!, $checkoutId: ID!) {
-  checkoutShippingAddressUpdateV2(
-    shippingAddress: $shippingAddress
-    checkoutId: $checkoutId
+  mutation checkoutShippingAddressUpdateV2(
+    $shippingAddress: MailingAddressInput!
+    $checkoutId: ID!
   ) {
-    checkout {
-      id
-    }
-    checkoutUserErrors {
-      code
-      field
-      message
+    checkoutShippingAddressUpdateV2(
+      shippingAddress: $shippingAddress
+      checkoutId: $checkoutId
+    ) {
+      checkout {
+        id
+      }
+      checkoutUserErrors {
+        code
+        field
+        message
+      }
     }
   }
-}`
+`;
 export const DiscountApply = gql`
-mutation checkoutDiscountCodeApplyV2($discountCode: String!, $checkoutId: ID!) {
-  checkoutDiscountCodeApplyV2(
-    discountCode: $discountCode
-    checkoutId: $checkoutId
+  mutation checkoutDiscountCodeApplyV2(
+    $discountCode: String!
+    $checkoutId: ID!
   ) {
-    checkout {
-      id
-    }
-    checkoutUserErrors {
-      code
-      field
-      message
+    checkoutDiscountCodeApplyV2(
+      discountCode: $discountCode
+      checkoutId: $checkoutId
+    ) {
+      checkout {
+        id
+      }
+      checkoutUserErrors {
+        code
+        field
+        message
+      }
     }
   }
-}
-`
+`;
 export const lastIncompleteCheckout = gql`
-query myQuery($input: String!) {
-  customer(customerAccessToken: $input) {
-    lastIncompleteCheckout {
-      id
-      lineItems(first: 20) {
-        edges {
-          node {
-            id
-            quantity
-            title
-            variant {
+  query myQuery($input: String!) {
+    customer(customerAccessToken: $input) {
+      lastIncompleteCheckout {
+        id
+        lineItems(first: 20) {
+          edges {
+            node {
               id
+              quantity
               title
-              currentlyNotInStock
-              priceV2 {
-                amount
+              variant {
+                id
+                title
+                currentlyNotInStock
+                priceV2 {
+                  amount
+                }
+                availableForSale
+                quantityAvailable
               }
-              availableForSale
-              quantityAvailable
             }
           }
         }
-      }
-      lineItemsSubtotalPrice {
-        amount
-        currencyCode
-      }
-    }
-  }
-}`
-export const CustomerAddress = gql`
-query CustomerAddress($input: String!) {
-  customer(customerAccessToken: $input) {
-    addresses(first: 10) {
-      edges {
-        node {
-          address1
-          address2
-          city
-          company
-          country
-          firstName
-          lastName
-          phone
-          province
-          zip
-          id
+        lineItemsSubtotalPrice {
+          amount
+          currencyCode
         }
       }
     }
-    defaultAddress {
-      id
+  }
+`;
+export const CustomerAddress = gql`
+  query CustomerAddress($input: String!) {
+    customer(customerAccessToken: $input) {
+      addresses(first: 10) {
+        edges {
+          node {
+            address1
+            address2
+            city
+            company
+            country
+            firstName
+            lastName
+            phone
+            province
+            zip
+            id
+          }
+        }
+      }
+      defaultAddress {
+        id
+      }
     }
   }
-}
-`
+`;
 
 export const createCheckout = gql`
-  mutation checkoutCreate ($input: CheckoutCreateInput!){
+  mutation checkoutCreate($input: CheckoutCreateInput!) {
     checkoutCreate(input: $input) {
       userErrors {
         message
@@ -182,7 +198,10 @@ export const createCheckout = gql`
 `;
 
 export const checkoutLineItemsAdd = gql`
-  mutation checkoutLineItemsAdd ($checkoutId: ID!, $lineItems: [CheckoutLineItemInput!]!) {
+  mutation checkoutLineItemsAdd(
+    $checkoutId: ID!
+    $lineItems: [CheckoutLineItemInput!]!
+  ) {
     checkoutLineItemsAdd(checkoutId: $checkoutId, lineItems: $lineItems) {
       userErrors {
         message
@@ -197,7 +216,10 @@ export const checkoutLineItemsAdd = gql`
 `;
 
 export const checkoutLineItemsUpdate = gql`
-  mutation checkoutLineItemsUpdate ($checkoutId: ID!, $lineItems: [CheckoutLineItemUpdateInput!]!) {
+  mutation checkoutLineItemsUpdate(
+    $checkoutId: ID!
+    $lineItems: [CheckoutLineItemUpdateInput!]!
+  ) {
     checkoutLineItemsUpdate(checkoutId: $checkoutId, lineItems: $lineItems) {
       userErrors {
         message
@@ -212,8 +234,11 @@ export const checkoutLineItemsUpdate = gql`
 `;
 
 export const checkoutLineItemsRemove = gql`
-  mutation checkoutLineItemsRemove ($checkoutId: ID!, $lineItemIds: [ID!]!) {
-    checkoutLineItemsRemove(checkoutId: $checkoutId, lineItemIds: $lineItemIds) {
+  mutation checkoutLineItemsRemove($checkoutId: ID!, $lineItemIds: [ID!]!) {
+    checkoutLineItemsRemove(
+      checkoutId: $checkoutId
+      lineItemIds: $lineItemIds
+    ) {
       userErrors {
         message
         field
@@ -226,38 +251,43 @@ export const checkoutLineItemsRemove = gql`
   ${CheckoutFragment}
 `;
 
-
-
 export const checkoutCustomerAssociate = gql`
- mutation checkoutCustomerAssociateV2($checkoutId: ID!, $customerAccessToken: String!) {
-  checkoutCustomerAssociateV2(
-    checkoutId: $checkoutId
-    customerAccessToken: $customerAccessToken
+  mutation checkoutCustomerAssociateV2(
+    $checkoutId: ID!
+    $customerAccessToken: String!
   ) {
-    checkout {
-      ...CheckoutFragment
-    }
-    checkoutUserErrors {
-      code
-      field
-      message
-    }
-    customer {
-      id
+    checkoutCustomerAssociateV2(
+      checkoutId: $checkoutId
+      customerAccessToken: $customerAccessToken
+    ) {
+      checkout {
+        ...CheckoutFragment
+      }
+      checkoutUserErrors {
+        code
+        field
+        message
+      }
+      customer {
+        id
+      }
     }
   }
-}
 
   ${CheckoutFragment}
 `;
 
 export function addVariantToCart(variantId, quantity) {
-  this.props.checkoutLineItemsAdd(
-    {
-      variables: { checkoutId: this.state.checkout.id, lineItems: [{ variantId, quantity: parseInt(quantity, 10) }] }
-    }).then((res) => {
+  this.props
+    .checkoutLineItemsAdd({
+      variables: {
+        checkoutId: this.state.checkout.id,
+        lineItems: [{variantId, quantity: parseInt(quantity, 10)}],
+      },
+    })
+    .then(res => {
       this.setState({
-        checkout: res.data.checkoutLineItemsAdd.checkout
+        checkout: res.data.checkoutLineItemsAdd.checkout,
       });
     });
 
@@ -265,35 +295,47 @@ export function addVariantToCart(variantId, quantity) {
 }
 
 export function updateLineItemInCart(lineItemId, quantity) {
-  this.props.checkoutLineItemsUpdate(
-    {
-      variables: { checkoutId: this.state.checkout.id, lineItems: [{ id: lineItemId, quantity: parseInt(quantity, 10) }] }
-    }).then((res) => {
+  this.props
+    .checkoutLineItemsUpdate({
+      variables: {
+        checkoutId: this.state.checkout.id,
+        lineItems: [{id: lineItemId, quantity: parseInt(quantity, 10)}],
+      },
+    })
+    .then(res => {
       this.setState({
-        checkout: res.data.checkoutLineItemsUpdate.checkout
+        checkout: res.data.checkoutLineItemsUpdate.checkout,
       });
     });
 }
 
 export function removeLineItemInCart(lineItemId) {
-  this.props.checkoutLineItemsRemove(
-    {
-      variables: { checkoutId: this.state.checkout.id, lineItemIds: [lineItemId] }
-    }).then((res) => {
+  this.props
+    .checkoutLineItemsRemove({
+      variables: {
+        checkoutId: this.state.checkout.id,
+        lineItemIds: [lineItemId],
+      },
+    })
+    .then(res => {
       this.setState({
-        checkout: res.data.checkoutLineItemsRemove.checkout
+        checkout: res.data.checkoutLineItemsRemove.checkout,
       });
     });
 }
 
 export function associateCustomerCheckout(customerAccessToken) {
-  this.props.checkoutCustomerAssociate(
-    {
-      variables: { checkoutId: this.state.checkout.id, customerAccessToken: customerAccessToken }
-    }).then((res) => {
+  this.props
+    .checkoutCustomerAssociate({
+      variables: {
+        checkoutId: this.state.checkout.id,
+        customerAccessToken: customerAccessToken,
+      },
+    })
+    .then(res => {
       this.setState({
         checkout: res.data.checkoutCustomerAssociate.checkout,
-        isCustomerAuthOpen: false
+        isCustomerAuthOpen: false,
       });
     });
 }

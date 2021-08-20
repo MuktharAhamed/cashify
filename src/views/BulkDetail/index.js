@@ -1,4 +1,3 @@
-import base64 from 'base-64';
 import utf8 from 'utf8';
 import {gql, useMutation, useLazyQuery, useQuery} from '@apollo/client';
 import {
@@ -18,6 +17,10 @@ import {
   TextInput,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import styles from 'app-views/BulkDetail/style';
+import {Button} from 'react-native-paper';
+import style from 'app-views/Home/style';
+// import {Link} from 'react-native-paper';
 
 ////https://shopify.dev/custom-storefronts/checkout#update-the-checkout
 
@@ -58,7 +61,7 @@ const getBulkProductDetail = gql`
   }
 `;
 
-const BulkListing = props => {
+const BulkDetail = props => {
   const [productsCanBeRemoved, setProductsThatCanBeRemoved] = useState(0);
   const [currentBulkProduct, setCurrentBulkProduct] = useState({});
   const [isBulkProductFetched, setBulkProductFetched] = useState(false);
@@ -74,7 +77,7 @@ const BulkListing = props => {
   });
 
   useEffect(() => {
-    // console.log(props.customer.customerId);
+    console.log('route params', props.route?.params);
     var productId;
     if (props.route?.params?.ProductId) {
       console.log('contains product id', props);
@@ -155,18 +158,210 @@ const BulkListing = props => {
         });
         setCurrentBulkProduct(currentBulkProduct);
         setBulkProductFetched(true);
-        console.log(currentBulkProduct);
+        console.log('currentBulkProduct', currentBulkProduct);
       }
     }
   }, [bulkProductLoading, bulkProductData]);
 
-  return isBulkProductFetched && <></>;
+  return (
+    isBulkProductFetched && (
+      <ScrollView style={{flex: 1}}>
+        <View style={styles.detaillisting}>
+          <Image
+            source={require('app-assets/mob/mobile1.jpg')}
+            style={styles.productsImage}
+          />
+          <View style={{alignItems: 'flex-start', justifyContent: 'center'}}>
+            <Text style={{fontSize: 16, fontWeight: 'bold'}}>
+              Bulk Lot Of {currentBulkProduct.TotalProductsCount} Devices
+            </Text>
+            <Text style={styles.textgrey}>CASHIFYBFV</Text>
+            <Text style={styles.textgrey}>Type: pre-used</Text>
+            <Text style={styles.textgrey}>
+              Bulk Price:
+              <Text style={{fontSize: 18, marginTop: 4, color: 'red'}}>
+                {'  '}₹{currentBulkProduct.TotalPrice}
+              </Text>
+            </Text>
+            <Text style={{fontSize: 14, marginTop: 2, color: 'red'}}>
+              ₹
+              {currentBulkProduct.TotalPrice /
+                currentBulkProduct.TotalProductsCount}
+              /Devices
+            </Text>
+          </View>
+          <View style={{marginTop: 1}}>
+            <Icon name={'favorite-border'} size={30} color={'#D3D3D3'} />
+          </View>
+        </View>
+        <GradeListing products={currentBulkProduct} />
+        <View style={{paddingHorizontal: 20, marginTop: 10}}>
+          <View
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+            }}
+          >
+            <Text style={{fontWeight: 'bold'}}>Lot Composition</Text>
+            <Icon
+              style={{color: 'black'}}
+              name={'file-download'}
+              size={30}
+              color={'#D3D3D3'}
+            />
+          </View>
+          <Text style={{color: 'grey'}}>
+            You can reject upto 2 Devices from this Lot
+          </Text>
+        </View>
+        {currentBulkProduct.allVariants?.map((item, index) => {
+          return <ProductList key={index} text={item} />;
+        })}
+        <GradingProcess />
+        <Button
+          mode="contained"
+          style={{
+            marginLeft: 12,
+            marginRight: 24,
+            marginTop: 15,
+            marginBottom: 10,
+          }}
+        >
+          buy now{' '}
+        </Button>
+      </ScrollView>
+    )
+  );
 };
 
+const GradeListing = ({products}) => {
+  console.log('GradeListing');
+  return (
+    <View style={styles.boxview}>
+      <Text style={{fontWeight: 'bold', marginTop: 3}}>Grades</Text>
+      <View
+        style={{
+          borderBottomColor: 'lightgrey',
+          borderBottomWidth: 2,
+          alignSelf: 'stretch',
+          marginHorizontal: 10,
+          marginTop: 5,
+        }}
+      />
+      {Object.entries(products.gradeDetails)?.map((item, index) => {
+        return <Grade key={index} text={item} />;
+      })}
+      <Text style={{fontWeight: 'bold', marginTop: 15}}>Brands</Text>
+      <View
+        style={{
+          borderBottomColor: 'lightgrey',
+          borderBottomWidth: 2,
+          alignSelf: 'stretch',
+          marginHorizontal: 10,
+          marginTop: 5,
+        }}
+      />
+      {Object.entries(products.brandDetails)?.map((item, index) => {
+        return <Brands key={index} text={item} />;
+      })}
+    </View>
+  );
+};
+const Grade = ({text}) => {
+  console.log('gradecall', text[0]);
+  return (
+    <View style={styles.view}>
+      <Text style={styles.gradeText}>
+        {'GRADE ' + text[0]}
+        {'  '}
+      </Text>
+      <Text>{text[1] + ' units'}</Text>
+    </View>
+  );
+};
+const Brands = ({text}) => {
+  return (
+    <View style={styles.view}>
+      <Text>
+        {text[0]}
+        {'  '}
+      </Text>
+      <Text>{text[1] + ' units'}</Text>
+    </View>
+  );
+};
+
+const ProductList = ({text}) => {
+  console.log(text?.id, 'ProductList');
+  return (
+    <View style={[styles.boxview, {marginTop: 10}]}>
+      <View
+        style={{display: 'flex', flexDirection: 'row', paddingVertical: 10}}
+      >
+        <Image
+          source={require('app-assets/mob/mobile1.jpg')}
+          style={styles.productsImage}
+        />
+        <View>
+          <Text>{text?.title + '(' + text?.size + ')'} </Text>
+          <Text style={{fontSize: 12, marginTop: 4, color: 'grey'}}>
+            Bulk Price:
+            <Text style={{fontSize: 18, marginTop: 4, color: 'black'}}>
+              {'  '}₹{text?.price}
+            </Text>
+          </Text>
+          <View
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginTop: 10,
+            }}
+          >
+            <Text style={styles.gradeText}>Grade {text?.grade}</Text>
+            <Text style={{color: 'blue', textDecorationLine: 'underline'}}>
+              View Complete Report
+            </Text>
+          </View>
+        </View>
+      </View>
+      <View
+        style={{
+          display: 'flex',
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+        }}
+      >
+        <Button>View Images</Button>
+        <Button>Reject Device</Button>
+      </View>
+    </View>
+  );
+};
+
+const GradingProcess = () => {
+  return (
+    <View style={[styles.boxview, {marginTop: 10, paddingVertical: 10}]}>
+      <Text>Cashify Grading Process</Text>
+      <Text
+        style={{
+          color: 'blue',
+          textDecorationLine: 'underline',
+          marginTop: 10,
+          marginBottom: 10,
+        }}
+      >
+        Discription of how the given grade devices will look like
+      </Text>
+    </View>
+  );
+};
 const mapStateToProps = (state, props) => {
   return {
     customer: state.customer,
   };
 };
 
-export default connect(mapStateToProps)(BulkListing);
+export default connect(mapStateToProps)(BulkDetail);

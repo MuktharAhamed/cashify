@@ -10,14 +10,17 @@ import React, {useState, useEffect} from 'react';
 import {connect} from 'react-redux';
 import {
   Image,
-  TouchableWithoutFeedback,
   ScrollView,
   View,
   TouchableOpacity,
   Text,
-  TextInput,
+  FlatList,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import {useNavigation} from '@react-navigation/native';
+import styles from 'app-views/BulkListing/style';
+import {log} from 'react-native-reanimated';
+import {NavBulkDetail} from 'app-constants/Navigations';
 
 ////https://shopify.dev/custom-storefronts/checkout#update-the-checkout
 
@@ -119,34 +122,195 @@ const BulkListing = props => {
                   currentPrice != undefined && currentPrice > 0
                     ? bulkProduct.TotalPrice + currentPrice
                     : 0;
-                bulkProduct.gradeDetails = '';
-                var allGrades = Object.entries(grades);
-                if (allGrades.length > 0) {
-                  allGrades.forEach(
-                    g =>
-                      (bulkProduct.gradeDetails =
-                        bulkProduct.gradeDetails == ''
-                          ? g.join(':')
-                          : `${bulkProduct.gradeDetails} ${g.join(':')}`),
-                    //////bulkProduct.gradeDetails.push(g.join(':'));
-                  );
-                }
+                bulkProduct.gradeDetails = grades;
+                // console.log('obj', grades);
+                // var allGrades = Object.entries(grades);
+                // console.log('allGrades', allGrades);
+                // if (allGrades.length > 0) {
+                //   allGrades.forEach(
+                //     (g, i) => (bulkProduct.gradeDetails[g[0]] = g[1]),
+                //     // (bulkProduct.gradeDetails =
+                //     //   bulkProduct.gradeDetails == ''
+                //     //     ? g.join(':')
+                //     //     : `${bulkProduct.gradeDetails} ${g.join(':')}`),
+                //   );
+                // }
+                console.log(
+                  'bulkProduct.gradeDetails[i]',
+                  bulkProduct.gradeDetails,
+                );
                 // bulkProduct.variants.push(currentVariant);
               });
               //   console.log(bulkProduct.title);
               //   console.log('bulkProduct.gradeDetails');
               //   console.log(bulkProduct.gradeDetails);
               //   bulkProduct.costPerUnit = TotalPrice
-              console.log(bulkProduct);
+              // console.log(bulkProduct);
               currentBulkProducts.push(bulkProduct);
             }
           });
         }
       }
+      console.log('currentBulkProducts', currentBulkProducts);
+      setBulkCollections(currentBulkProducts);
+      console.log('bulkCollections', bulkCollections);
     }
   }, [bulkProductsLoading, bulkProductsData]);
+  const renderProductlist = ({item}) => {
+    {
+      console.log('item', item);
+    }
+    return <ProductBlock item={item} />;
+  };
+  return (
+    // isBulkCollectionsFetched && (
+    <View>
+      <FlatList
+        data={bulkCollections} //allVariants
+        keyExtractor={item => item.ProductId} //has to be unique
+        renderItem={renderProductlist} //method to render the data in the way you want using styling u need
+        horizontal={false}
+        numColumns={2}
+        contentContainerStyle={{paddingBottom: 30}}
+      />
+    </View>
+    // )
+  );
+};
 
-  return isBulkCollectionsFetched && <></>;
+const ProductBlock = ({item}) => {
+  const navigation = useNavigation();
+  return (
+    <View style={styles.productsContainer}>
+      {console.log('item.productId', item)}
+      <TouchableOpacity
+        activeOpacity={0.9}
+        onPress={() =>
+          navigation.navigate(NavBulkDetail, {
+            ProductId: item.ProductId,
+            // VariantId: item.varientid,
+          })
+        }
+      >
+        <View
+          style={{
+            flex: 1,
+            flexDirection: 'row',
+            marginVertical: 10,
+          }}
+        >
+          <View
+            style={{
+              flex: 5,
+              marginLeft: 5,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Image
+              source={require('app-assets/no-image.jpg')}
+              style={styles.productsImage}
+            />
+          </View>
+          <View style={{flex: 1, paddingHorizontal: 5}}>
+            <Icon name={'favorite-border'} size={30} color={'#D3D3D3'} />
+          </View>
+        </View>
+        <View
+          style={{
+            marginLeft: 5,
+            marginTop: 5,
+            flex: 1,
+          }}
+        >
+          <View>
+            <Text style={{...styles.productsTitle, height: 45}}>
+              {`Bulk Lot of ` + item.TotalProductsCount + ` devices`}
+            </Text>
+            <Text style={[{...styles.productsTitle, color: '#F08080'}]}>
+              {item.TotalPrice}
+            </Text>
+            <Text style={[{...styles.productsTitle, color: '#F08080'}]}>
+              {`₹ ` + item.TotalPrice / item.TotalProductsCount}
+            </Text>
+          </View>
+          <View style={styles.grade}>
+            <View style={styles.gradeListing}>
+              <Text>
+                Grade:
+                {/* {item.gradeDetails['A']} */}
+                {'    '}
+              </Text>
+              <Text>
+                A:
+                {Object.values('' + item.gradeDetails['A']).length == 1
+                  ? '' + item.gradeDetails['A'] + 0
+                  : Object.values('' + item.gradeDetails['A']).length == 2
+                  ? item.gradeDetails['A']
+                  : '00'}
+                {'    '}
+              </Text>
+              <Text>
+                B:
+                {Object.values('' + item.gradeDetails['B']).length == 1
+                  ? '' + item.gradeDetails['B'] + 0
+                  : Object.values('' + item.gradeDetails['B']).length == 2
+                  ? item.gradeDetails['B']
+                  : '00'}
+                {'    '}
+              </Text>
+            </View>
+            <View style={styles.gradeListing}>
+              <Text>
+                C:
+                {Object.values('' + item.gradeDetails['C']).length == 1
+                  ? '' + item.gradeDetails['C'] + 0
+                  : Object.values('' + item.gradeDetails['C']).length == 2
+                  ? item.gradeDetails['C']
+                  : '00'}
+                {'       '}
+              </Text>
+              <Text>
+                D:
+                {Object.values('' + item.gradeDetails['D']).length == 1
+                  ? '' + item.gradeDetails['D'] + 0
+                  : Object.values('' + item.gradeDetails['D']).length == 2
+                  ? item.gradeDetails['D']
+                  : '00'}
+                {'     '}
+              </Text>
+              <Text>
+                E:
+                {Object.values('' + item.gradeDetails['E']).length == 1
+                  ? '' + item.gradeDetails['E'] + 0
+                  : Object.values('' + item.gradeDetails['E']).length == 2
+                  ? item.gradeDetails['E']
+                  : '00'}
+                {'    '}
+              </Text>
+            </View>
+          </View>
+        </View>
+      </TouchableOpacity>
+      <View style={{marginVertical: 15}}>
+        <TouchableOpacity
+          underlay
+          style={{
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: 5,
+          }}
+          onPress={() => {
+            addToCart;
+          }}
+        >
+          <Text color="#1877F2" style={styles.addToCartButton}>
+            Add to Cart
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
 };
 
 const mapStateToProps = (state, props) => {

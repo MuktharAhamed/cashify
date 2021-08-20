@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "872813419295",
+    "project_id": "cashify-clone",
+    "storage_bucket": "cashify-clone.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:872813419295:android:740642c624e45a3b08ae2a",
+        "android_client_info": {
+          "package_name": "com.cashify"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "872813419295-8n7o6ni8fjr7165nk1af13e6ukk44soq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBTQL1lwcn4KPXDiHKYcWMI58xuA5CINQs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "872813419295-8n7o6ni8fjr7165nk1af13e6ukk44soq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

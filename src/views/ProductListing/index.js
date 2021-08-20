@@ -15,16 +15,15 @@ import {
   ScrollView,
   TouchableNativeFeedback,
 } from 'react-native';
-import * as action from "../../action/index";
-import { useNavigation } from '@react-navigation/native';
+import * as action from '../../action/index';
+import {useNavigation} from '@react-navigation/native';
 
 import {
   GraphqlAdminApi,
   GraphqlStoreFrontApi,
-
 } from 'app-constants/GraphqlConstants';
-import { Button } from 'react-native-paper';
-import { Searchbar } from 'react-native-paper';
+import {Button} from 'react-native-paper';
+import {Searchbar} from 'react-native-paper';
 import Catergories from 'app-views/Home/Categories';
 import ByPrice from 'app-views/Home/ByPrice';
 import ByGrade from 'app-views/Home/ByGrade';
@@ -33,11 +32,14 @@ import TodaysDeals from 'app-views/Home/TodaysDeals';
 
 import styles from 'app-views/ProductListing/style';
 
-import { gql, useLazyQuery,useMutation } from '@apollo/client';
-import { createCheckout,CheckoutLineAdd,checkoutCustomerAssociate } from "../../checkOut";
+import {gql, useLazyQuery, useMutation} from '@apollo/client';
+import {
+  createCheckout,
+  CheckoutLineAdd,
+  checkoutCustomerAssociate,
+} from '../../checkOut';
 
 import {
-
   NavProductDetailPage,
   NavProductListingPage,
 } from 'app-constants/Navigations';
@@ -83,7 +85,6 @@ const query = gql`
   }
 `;
 
-
 const addproductToFavoritesQuery = gql`
   mutation updateFavoritesForUser($input: CustomerInput!) {
     customerUpdate(input: $input) {
@@ -105,37 +106,39 @@ const addproductToFavoritesQuery = gql`
   }
 `;
 
-
 const ProductListingPage = props => {
-
   // console.log('propsnavigation', `title:GRADE ` + props.route.params.text);
   // const [gradetype, setGradetype] = useState(props.route.params.text);
   // const [querytag, setquerytag] = useState(`title:GRADE ` + gradetype);
-  const [createCheckoutMut, { data: checkoutData, error: CheckoutError }] = useMutation(createCheckout);
-  const [LineItemToCart, { data: lineItemResponse, error: linrItemError }] = useMutation(CheckoutLineAdd);
-  const [CustomerAssociate, { data: CustomerAssociateData, error: CustomerError }] = useMutation(checkoutCustomerAssociate);
+  const [createCheckoutMut, {data: checkoutData, error: CheckoutError}] =
+    useMutation(createCheckout);
+  const [LineItemToCart, {data: lineItemResponse, error: linrItemError}] =
+    useMutation(CheckoutLineAdd);
+  const [
+    CustomerAssociate,
+    {data: CustomerAssociateData, error: CustomerError},
+  ] = useMutation(checkoutCustomerAssociate);
   // const [CheckoutId, setCheckoutId] = useState(props.checkout.CheckoutId)
-  useEffect(() => {
-    if (props.checkout.CheckoutId)
-    CustomerAssociate({
-        context: GraphqlStoreFrontApi,
-        variables: { checkoutId: CheckoutId, customerAccessToken: props.customer.customerAccessToken }
-      })
-  }, [props.checkout.CheckoutId])
-  if (checkoutData) {
-    if (checkoutData.checkoutCreate?.checkout?.id)
-      props.checkout(checkoutData)
-  }
-  if (lineItemResponse) { props.lineItem(lineItemResponse) }
+
+  // if (checkoutData) {
+  //   console.log('checkoutData');
+  //   console.log(checkoutData);
+  //   if (checkoutData.checkoutCreate?.checkout?.id) props.checkout(checkoutData);
+  // }
+  // if (lineItemResponse) {
+  //   props.lineItem(lineItemResponse);
+  // }
   const [
     getProductsByQuery,
-    { loading: productLoading, error: productError, data },
+    {loading: productLoading, error: productError, data},
   ] = useLazyQuery(query, {
     fetchPolicy: 'network-only',
   });
 
   const [addProductToFavorites] = useMutation(addproductToFavoritesQuery);
-
+  // const [currentCheckoutId, setCurrentCheckoutId] = useState(
+  //   props.checkout.CheckoutId,
+  // );
   const defaultFilters = [
     {
       text: 'Grade A',
@@ -184,10 +187,25 @@ const ProductListingPage = props => {
   // console.log('loading', loading);
   // console.log('error', error);
 
+  const associateCheckoutWithUser = async (newCheckoutId, checkoutId) => {
+    console.log('associateCheckoutWithUser');
+    console.log(checkoutId);
+    if (checkoutId != newCheckoutId) {
+      var customAssociateResp = await CustomerAssociate({
+        context: GraphqlStoreFrontApi,
+        variables: {
+          checkoutId: newCheckoutId,
+          customerAccessToken: props.customer.customerAccessToken,
+        },
+      });
+      console.log('customAssociateResp');
+      console.log(customAssociateResp);
+    }
+  };
+
   useEffect(() => {
     if (!productLoading && props?.route?.params?.text != null) {
       try {
-
         var existingFavItems = props.customer.favoriteItems
           ? props.customer.favoriteItems.split(',')
           : [];
@@ -240,7 +258,7 @@ const ProductListingPage = props => {
                     ?.toLowerCase()
                     .includes(ProductConstants.PRODUCT_GRADE)
                 ) {
-                  var currentProductVariant = { ...varient };
+                  var currentProductVariant = {...varient};
                   product.node.variants.edges.forEach(a => {
                     var currentProdGrade = a.node.selectedOptions.find(
                       x =>
@@ -253,7 +271,7 @@ const ProductListingPage = props => {
                       props.route.params.text == currentProdGrade ||
                       selectedFilters.length > 0
                     ) {
-                      var currentProductVariant = { ...varient };
+                      var currentProductVariant = {...varient};
                       currentProductVariant.grade = currentProdGrade;
                       currentProductVariant.varientid = a.node?.id;
                       currentProductVariant.price = a.node?.price;
@@ -274,7 +292,6 @@ const ProductListingPage = props => {
                   });
                   // console.log(product.node.variants);
                 } else {
-
                   // console.log();
                   var currentProductVariant = {...varient};
 
@@ -309,86 +326,14 @@ const ProductListingPage = props => {
       }
     }
   }, [data, productLoading]);
-  {
-  
-      // const selectedfilters = [];
-      // if (gradeaselected) {
-      //   selectedfilters.push('a');
-      // }
-      // if (gradebselected) {
-      //   selectedfilters.push('b');
-      // }
-      // if (appleselected) {
-      //   selectedfilters.push('apple');
-      // }
-      // console.log('selectedfilters', selectedfilters);
-      // if (data !== undefined) {
-      // var products = data.shop.collections.edges[0].node.products.edges;
-      // // console.log(products,"products");
-      // products.forEach(x => {
-      //   x.node.variants.edges.filter(c => {
-      //     varient.productid = x.node.id;
-      //     varient.productname = x.node.title;
-      //     varient.image = x.node.images.edges[0]?.node.src;
-      //     varient.varientid = c.node.id;
-      //     varient.price = c.node.price;
-      //     varient.quantity = c.node.quantityAvailable;
-      //     varient.varientname = c.node.title;
-      //     c.node.selectedOptions.forEach(v => {
-      //       // console.log('x.node.title', x.node.title);
-      //       // console.log('appleselected', appleselected);
-      //       if (
-      //         v.name.toLowerCase() == 'grade' && !selectedfilters.length > 0
-      //           ? v.value.toLowerCase() ==
-      //             props.route.params.text.toLowerCase()
-      //           : // &&
-      //             // selectedfilters.length > 0 &&
-      //             selectedfilters.includes(v.value.toLowerCase())
-      //         // &&
-      //         // appleselected ===true &&
-      //         // x.node.title.toLowerCase().includes('apple')
-      //       ) {
-      //         // console.log('bothgrades', v.value.toLowerCase());
-      //         // console.log('appleselected', appleselected);
-      //         varient['grade'] = v.value;
-      //         allVariants.push(varient);
-      //         varient = {};
-      //       }
-      //     });
-      //   });
-      // });
-      // setCurrentVariant(allVariants);
-      // }
-  //   }
-  // }, [data, productLoading]);
-  
-  // const [gradeaselected, setGradeaselected] = useState(false);
-  // const [gradebselected, setGradebselected] = useState(false);
-  // const [appleselected, setAppleselected] = useState(false);
-  // const [samsungselected, setSamsungselected] = useState(false);
-  // const [redmiselected, setRedmiselected] = useState(false);
-  // const [rateselected, setRateselected] = useState(false);
-  }
 
   useEffect(() => {
     // console.log('hit');
     if (filters.some(a => a.isselected)) {
       var selectedQuery = filters
-      .filter(a => a.isselected)
-      .map(x => `title:\"${x.text}\"`);
-      // var existingFilters = ["title:\"Grade " + props.route.params.text + "\""]
-      // var existingFilters = [`title:\"Grade ${props.route.params.text}"`];
-      // var filterQuery = [...existingFilters, ...selectedQuery].join(' OR ');
-      // var existingFilters = ['title:"Grade ' + props.route.params.text + '"'];
-      // var selectedQuery = filters
-      //   .filter(a => a.isselected)
-      //   .map(x => 'title:"' + x.text + '"');
-      // var filterQuery = [...selectedQuery];
-      // console.log('propsload');
+        .filter(a => a.isselected)
+        .map(x => `title:\"${x.text}\"`);
       var filterQuery = [...selectedQuery].join(' OR ');
-
-      // console.log('filterQuery');
-      // console.log(filterQuery);
       try {
         getProductsByQuery({
           context: GraphqlStoreFrontApi,
@@ -400,7 +345,6 @@ const ProductListingPage = props => {
         console.log(e);
       }
     } else {
-
       let input;
       if (props.route.params.from == 'Brand') {
         input = `title:\"${props.route.params.text}\"`;
@@ -423,82 +367,7 @@ const ProductListingPage = props => {
     }
   }, [filters]);
 
-  // useEffect(() => {
-  //   if (!productLoading && productError != null) {
-  //     try {
-  //       let selectedfilters;
-  //       if (gradeaselected) {
-  //         selectedfilters = 'title:"GRADE A"';
-  //       }
-  //       if (gradebselected) {
-  //         if (selectedfilters) {
-  //           selectedfilters += ' OR ';
-  //         }
-  //         selectedfilters =
-  //           (selectedfilters ? selectedfilters : '') +
-  //           'title:' +
-  //           (gradebselected ? '"GRADE B"' : '');
-  //       }
-  //       if (appleselected) {
-  //         if (selectedfilters) {
-  //           selectedfilters += ' OR ';
-  //         }
-  //         selectedfilters =
-  //           (selectedfilters ? selectedfilters : '') +
-  //           'title:' +
-  //           (appleselected ? '"APPLE"' : '');
-  //       }
-  //       console.log('selectedfilters', selectedfilters);
-  //       console.log('propsload');
-  //       if (selectedfilters) {
-  //         getProductsByQuery({
-  //           context: GraphqlStoreFrontApi,
-  //           variables: {
-  //             collectionquery: selectedfilters,
-  //             // ? selectedfilters
-  //             // : 'title:GRADE ' + gradetype,
-  //           },
-  //         });
-  //       } else {
-  //         getProductsByQuery({
-  //           context: GraphqlStoreFrontApi,
-  //           variables: {collectionquery: `title:GRADE ` + gradetype},
-  //         });
-  //       }
-  //     } catch (e) {
-  //       console.log(e);
-  //     }
-  //   }
-  // }, [
-  //   productLoading
-  // ]);
-
-  // const handlegradeaselectedfilter = () => {
-  //   setGradeaselected(!gradeaselected);
-  // };
-  // const handlegradebselectedfilter = () => {
-  //   setGradebselected(!gradebselected);
-  // };
-  // const handleAppleselectedfilter = () => {
-  //   setAppleselected(!appleselected);
-  // };
-  // const handleSamsungselectedfilter = () => {
-  //   setSamsungselected(!samsungselected);
-  // };
-  // const handleRedmiselectedfilter = () => {
-  //   setRedmiselected(!redmiselected);
-  // };
-  // const handleRateselectedfilter = () => {
-  //   setRateselected(!rateselected);
-  // };
   const addOrRemoveProductFromFavoritesHandler = async variantId => {
-    // console.log(props.customer);
-    // setSelectedVariant(prev => {
-    //   return {
-    //     ...prev,
-    //     isProductInFavorites: !prev.isProductInFavorites,
-    //   };
-    // });
     var allVariants = currentVariant;
     allVariants.forEach(a => {
       if (a.id == variantId) {
@@ -556,7 +425,7 @@ const ProductListingPage = props => {
       });
       // console.log('result');
       // console.log(result?);
-      console.log(result.data?.customerUpdate?.userErrors);
+      // console.log(result.data?.customerUpdate?.userErrors);
       if (result && !result.data?.customerUpdate?.userErrors.length > 0) {
         // console.log(result.data?.customerUpdate?.customer.metafields.edges[0]);
         // console.log();
@@ -570,7 +439,7 @@ const ProductListingPage = props => {
   };
 
   const addSelectedFilter = text => {
-    console.log('addSelectedFilter');
+    // console.log('addSelectedFilter');
     updateFilters(prev => {
       // const existingFilters = prev;
       // console.log('newFilters');
@@ -584,19 +453,6 @@ const ProductListingPage = props => {
       return newFilters;
     });
   };
-
-  const renderProductlist = ({item}) => {
-    {
-      console.log('item', item);
-    }
-    return (
-      <ProductBlock
-        addToFavorites={addOrRemoveProductFromFavoritesHandler}
-        item={item}
-      />
-    );
-  }
-
 
   return (
     <View style={styles.ProductListingContainer}>
@@ -616,7 +472,7 @@ const ProductListingPage = props => {
             <Text>{e.id}</Text>
           ))}
           <Text
-            style={{ marginHorizontal: 1, fontWeight: 'bold', color: 'black' }}
+            style={{marginHorizontal: 1, fontWeight: 'bold', color: 'black'}}
           >
             {' '}
             Filters :{' '}
@@ -634,24 +490,27 @@ const ProductListingPage = props => {
       <FlatList
         data={currentVariant} //allVariants
         keyExtractor={item => item.varientid} //has to be unique
-        renderItem={({ item, index }) =>
-        <ProductBlock
-          item={item}
-          lineItemUpdate={(e => { LineItemToCart(e) })}
-          createCheckout={(e) => { createCheckoutMut(e) }}
-          checkoutId={props.checkout.CheckoutId}
-          addToFavorites={addOrRemoveProductFromFavoritesHandler}
-        />} //method to render the data in the way you want using styling u need
+        renderItem={({item, index}) => (
+          <ProductBlock
+            item={item}
+            lineItemUpdate={e => {
+              LineItemToCart(e);
+            }}
+            associateCheckoutWithUser={associateCheckoutWithUser}
+            createCheckout={createCheckoutMut}
+            checkoutId={props.checkout.CheckoutId}
+            addToFavorites={addOrRemoveProductFromFavoritesHandler}
+          />
+        )} //method to render the data in the way you want using styling u need
         horizontal={false}
         numColumns={2}
-        contentContainerStyle={{ paddingBottom: 30 }}
+        contentContainerStyle={{paddingBottom: 30}}
       />
     </View>
   );
 };
 
-
-const Filter = ({ event, text, isselected }) => {
+const Filter = ({event, text, isselected}) => {
   // console.log('fiter', event, text, isselected);
   // const [filters, updateFilters] = useState();
   return (
@@ -664,13 +523,13 @@ const Filter = ({ event, text, isselected }) => {
         style={
           isselected
             ? {
-              ...styles.selectedFilter,
-              paddingHorizontal: 10,
-            }
+                ...styles.selectedFilter,
+                paddingHorizontal: 10,
+              }
             : {
-              paddingHorizontal: 10,
-              color: 'black',
-            }
+                paddingHorizontal: 10,
+                color: 'black',
+              }
         }
       >
         {text}
@@ -679,26 +538,57 @@ const Filter = ({ event, text, isselected }) => {
   );
 };
 
-
-const ProductBlock = ({ item, index, createCheckout, lineItemUpdate, checkoutId }) => {
+const ProductBlock = ({
+  item,
+  index,
+  associateCheckoutWithUser,
+  createCheckout,
+  lineItemUpdate,
+  checkoutId,
+}) => {
   const navigation = useNavigation();
-  console.log(item)
-  const addToCart = () => {
-    // console.log(item.node.variants)
+  // console.log(item);
+  const addToCart = async varientid => {
+    console.log('item.node.variants');
+    console.log(varientid);
+
+    console.log(checkoutId);
     if (!checkoutId) {
-      // console.log("here")
-      createCheckout({
+      console.log('here');
+      // console.log(createCheckout);
+      const result = await createCheckout({
         context: GraphqlStoreFrontApi,
-        variables: { "input": { "lineItems": [{ "quantity": 1, "variantId": varientid }] } }
-      })
+        variables: {input: {lineItems: [{quantity: 1, variantId: varientid}]}},
+      });
+      if (!result.data.checkoutCreate?.userErrors?.length > 0) {
+        if (result.data.checkoutCreate?.checkout?.id) {
+          console.log('result.checkoutCreate?.checkout?.id');
+          console.log(result.data.checkoutCreate?.checkout?.id);
+          associateCheckoutWithUser(
+            result.data.checkoutCreate?.checkout?.id,
+            checkoutId,
+          );
+          // setCurrentCheckoutId(result.checkoutCreate?.checkout?.id);
+          // props.checkout(result.data.checkoutCreate?.checkout);
+        }
+        console.log('result');
+        console.log(result.data.checkoutCreate?.checkout?.id);
+      } else {
+        console.log('Error');
+        console.log(result.data.checkoutCreate?.userErrors);
+      }
     } else {
-      lineItemUpdate({
+      console.log('here lineItemUpdate');
+      var linetItemResponse = await lineItemUpdate({
         context: GraphqlStoreFrontApi,
         variables: {
-          "lineItems": [{ "quantity": 1, "variantId": varientid }],
-          "checkoutId": checkoutId
-        }
-      })
+          lineItems: [{quantity: 1, variantId: varientid}],
+          checkoutId: checkoutId,
+        },
+      });
+      if (lineItemResponse) {
+        props.lineItem(lineItemResponse);
+      }
     }
 
     // let previousData = [...AddToCartList]
@@ -707,97 +597,93 @@ const ProductBlock = ({ item, index, createCheckout, lineItemUpdate, checkoutId 
     // }
     // previousData.push({ quantity: 1, variantId: item.node.variants.edges[0].node.id })
     // setAddToCartList([...previousData,])
-  }
-
-
+  };
 
   return (
     <View style={styles.productsContainer}>
-    {console.log('item.productId', item)}
-    <TouchableOpacity
-      activeOpacity={0.9}
-      onPress={() =>
-        navigation.navigate(NavProductDetailPage, {
-          ProductId: item.productid,
-          VariantId: item.varientid,
-        })
-      }
-    >
-      <View
-        style={{
-          flex: 1,
-          flexDirection: 'row',
-          marginVertical: 10,
-        }}
+      <TouchableOpacity
+        activeOpacity={0.9}
+        onPress={() =>
+          navigation.navigate(NavProductDetailPage, {
+            ProductId: item.productid,
+            VariantId: item.varientid,
+          })
+        }
       >
-        {/* <TouchableOpacity> */}
         <View
           style={{
-            flex: 5,
-            marginLeft: 5,
-            alignItems: 'center',
-            justifyContent: 'center',
+            flex: 1,
+            flexDirection: 'row',
+            marginVertical: 10,
           }}
         >
-          {item.image == '' && (
-            <Image
-              source={require('app-assets/no-image.jpg')}
-              style={styles.productsImage}
+          {/* <TouchableOpacity> */}
+          <View
+            style={{
+              flex: 5,
+              marginLeft: 5,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            {item.image == '' && (
+              <Image
+                source={require('app-assets/no-image.jpg')}
+                style={styles.productsImage}
+              />
+            )}
+            {item.image != '' && (
+              <Image source={{uri: item.image}} style={styles.productsImage} />
+            )}
+            {/* </TouchableOpacity> */}
+          </View>
+          <View style={{flex: 1, paddingHorizontal: 5}}>
+            <MaterialCommunityIcons
+              style={{marginTop: 10}}
+              name={item.IsInFavorites ? 'heart' : 'heart-outline'}
+              size={30}
+              color={item.IsInFavorites ? 'red' : '#A9A9A9'}
             />
-          )}
-          {item.image != '' && (
-            <Image source={{uri: item.image}} style={styles.productsImage} />
-          )}
-          {/* </TouchableOpacity> */}
+          </View>
         </View>
-        <View style={{flex: 1, paddingHorizontal: 5}}>
-          <MaterialCommunityIcons
-            style={{marginTop: 10}}
-            name={item.IsInFavorites ? 'heart' : 'heart-outline'}
-            size={30}
-            color={item.IsInFavorites ? 'red' : '#A9A9A9'}
-          />
+        <View
+          style={{
+            marginLeft: 5,
+            marginTop: 5,
+            flex: 1,
+          }}
+        >
+          <View>
+            <Text style={{...styles.productsTitle, height: 45}}>
+              {item.productname + ' ' + item.varientname}
+            </Text>
+            <Text style={styles.gradeText}>{`GRADE ` + item.grade}</Text>
+            <Text style={[{...styles.productsTitle, color: '#F08080'}]}>
+              {item.price}
+            </Text>
+          </View>
         </View>
-      </View>
-      <View
-        style={{
-          marginLeft: 5,
-          marginTop: 5,
-          flex: 1,
-        }}
-      >
-        <View>
-          <Text style={{...styles.productsTitle, height: 45}}>
-            {item.productname + ' ' + item.varientname}
-          </Text>
-          <Text style={styles.gradeText}>{`GRADE ` + item.grade}</Text>
-          <Text style={[{...styles.productsTitle, color: '#F08080'}]}>
-            {item.price}
-          </Text>
-        </View>
-      </View>
-    </TouchableOpacity>
-    <View style={{marginVertical: 15}}>
-      <TouchableOpacity
-        underlay
-        style={{
-          alignItems: 'center',
-          justifyContent: 'center',
-          marginBottom: 5,
-        }}
-        onPress={() => {
-          addToCart;
-        }}
-      >
-        <Text color="#1877F2" style={styles.addToCartButton}>
-          Add to Cart
-        </Text>
       </TouchableOpacity>
+      <View style={{marginVertical: 15}}>
+        <TouchableOpacity
+          underlay
+          style={{
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: 5,
+          }}
+          onPress={() => {
+            addToCart(item.varientid);
+          }}
+        >
+          <Text color="#1877F2" style={styles.addToCartButton}>
+            Add to Cart
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
-  </View>
-);
+  );
 };
-
 
 // const ProductBlock = ({item, index}) => {
 //   // console.log('text');
@@ -873,10 +759,6 @@ const ProductBlock = ({ item, index, createCheckout, lineItemUpdate, checkoutId 
 //   );
 // };
 
-
-
-
-
 const mapDispatchToProps = {
   lineItem: action.lineItemData,
   checkout: action.checkoutData,
@@ -895,8 +777,3 @@ export default ProductListing = connect(
 )(ProductListingPage);
 
 export const PRODUCT_LISTING = 'PRODUCT_LISTING';
-
-
-
-
-

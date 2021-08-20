@@ -1,9 +1,14 @@
-import { NavHome, NavForgotPassword, NavSignup } from 'app-constants/Navigations';
+import {NavHome, NavForgotPassword, NavSignup} from 'app-constants/Navigations';
 import store from '../../store/index';
-import { setCustomer } from '../../action/index';
-import React, { useEffect } from 'react';
-import { useState } from 'react';
+import {setCustomer} from '../../action/index';
+import React, {useEffect} from 'react';
+import {useState} from 'react';
 import LinearGradient from 'react-native-linear-gradient';
+import {CommonActions} from '@react-navigation/native';
+import RazorpayCheckout from 'react-native-razorpay';
+import base64 from 'base-64';
+import utf8 from 'utf8';
+// import Razorpay from 'razorpay';
 // import store from '../../store/index'
 import {
   View,
@@ -15,13 +20,13 @@ import {
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Feather from 'react-native-vector-icons/Feather';
 import styles from 'app-views/Login/style';
-import { gql, useMutation, useLazyQuery, useQuery } from '@apollo/client';
+import {gql, useMutation, useLazyQuery, useQuery} from '@apollo/client';
 import {
   GraphqlAdminApi,
   GraphqlStoreFrontApi,
 } from 'app-constants/GraphqlConstants';
 import * as Animatable from 'react-native-animatable';
-import { useNavigation } from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 
 const getAccessToken = gql`
   mutation customerAccessTokenCreate($input: CustomerAccessTokenCreateInput!) {
@@ -87,7 +92,7 @@ const Login = props => {
   //  const [ updateTodo ] = useMutation(customerCreate);
   const [
     getCustomerByQuery,
-    { loading: customerLoading, error: CustomerError, data: customerData },
+    {loading: customerLoading, error: CustomerError, data: customerData},
   ] = useLazyQuery(getCustomer, {
     fetchPolicy: 'network-only',
   });
@@ -133,8 +138,63 @@ const Login = props => {
   };
   // var userName = `phone=${username}`
   const handlelogin = async () => {
+    // var MyOrderId = '';
+    // var Authorization =
+    //   'rzp_test_fZcItTROzJiLjq' + ':' + 'H4m8aGSZn2GOFZ0dCdyaojMu';
+    // const productIdBytes = utf8.encode(Authorization);
+    // var productId = base64.encode(productIdBytes);
+    // fetch('https://api.razorpay.com/v1/orders', {
+    //   method: 'post',
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //     Authorization: 'Basic ' + productId,
+    //   },
+    //   body: JSON.stringify({
+    //     amount: 1000000,
+    //     currency: 'INR',
+    //     receipt: 'Receipt no. 1',
+    //     payment_capture: 1,
+    //     notes: {
+    //       notes_key_1: 'Tea, Earl Grey, Hot',
+    //       notes_key_2: 'Tea, Earl Grey… decaf.',
+    //     },
+    //   }),
+    // }).then(res => {
+    //   console.log('res');
+    //   res.json().then(function (data) {
+    //     console.log('request succeeded with JSON response', data);
+    //     MyOrderId = data.id;
+    //     var options = {
+    //       description: 'Credits towards consultation',
+    //       currency: 'INR',
+    //       key: 'rzp_test_fZcItTROzJiLjq',
+    //       amount: '5000',
+    //       name: 'Acme Corp',
+    //       order_id: MyOrderId,
+    //       //Replace this with an order_id created using Orders API.
+    //       prefill: {
+    //         email: 'gaurav.kumar@example.com',
+    //         contact: '9191919191',
+    //         name: 'Gaurav Kumar',
+    //       },
+    //       theme: {color: '#53a20e'},
+    //     };
+    //     RazorpayCheckout.open(options)
+    //       .then(data => {
+    //         // handle success
+    //         alert(`Success: ${data.razorpay_payment_id}`);
+    //       })
+    //       .catch(error => {
+    //         // handle failure
+    //         alert(`Error: ${error.code} | ${error.description}`);
+    //       });
+    //   });
+    // });
+    // console.log('MyOrder');
+    // console.log(MyOrder);
+
     setLoading(true);
-    console.log(store.getState())
+    console.log(store.getState());
     if (username == '' && password == '') {
       setLoading(false);
       setErrormessage('Please enter your username and passwrod');
@@ -234,7 +294,12 @@ const Login = props => {
                     .expiresAt,
               }),
             );
-            navigation.navigate(NavHome);
+            const action = CommonActions.reset({
+              index: 0,
+              routes: [{name: 'Drawer', params: {screen: NavHome}}],
+            });
+            navigation.dispatch(action);
+            // navigation.navigate('firststep', {screen: NavHome});
           }
         } else {
           setLoading(false);
@@ -338,9 +403,10 @@ const Login = props => {
             style={styles.textInput}
             placeholder="Enter your Mobile Number"
             placeholderTextColor="#CDCDCD"
+            // value={'8667852939'}
           />
         </View>
-        <Text style={{ ...styles.text_footer, marginTop: 35 }}>Password</Text>
+        <Text style={{...styles.text_footer, marginTop: 35}}>Password</Text>
         <View style={styles.action}>
           <Feather
             style={styles.iconStyle}
@@ -355,6 +421,7 @@ const Login = props => {
             placeholderTextColor="#CDCDCD"
             onChangeText={text => handlesetpassword(text)}
             style={styles.textInput}
+            // value={'12345'}
           />
           <TouchableOpacity>
             <Feather
@@ -380,7 +447,7 @@ const Login = props => {
               colors={['#5db8fe', '#39cff2']}
               style={styles.signIn}
             >
-              <Text style={{ ...styles.textSignIn, color: 'white' }}>
+              <Text style={{...styles.textSignIn, color: 'white'}}>
                 {loading ? (
                   <ActivityIndicator size="small" color="#ffffff" />
                 ) : (
@@ -401,7 +468,7 @@ const Login = props => {
               marginTop: 15,
             }}
           >
-            <Text style={{ ...styles.textSignIn, color: '#4dc2f8' }}>
+            <Text style={{...styles.textSignIn, color: '#4dc2f8'}}>
               Sign Up
             </Text>
           </TouchableOpacity>
